@@ -431,6 +431,7 @@ textarea#negative{min-height:90px}
 .tlen{margin-left:auto;padding:2px;border-radius:11px}
 .tlen button{padding:5px 9px;font-size:12px;border-radius:9px}
 .tipodesc{display:flex;gap:8px;margin-top:8px}
+.tipodesc[hidden],.tipobox[hidden]{display:none}
 .tipodesc input{flex:1;padding:9px 12px;border-radius:12px;font-size:14px}
 .tipobox{margin-top:8px;padding:10px;border-radius:16px;background:var(--field);border:1px dashed rgba(var(--accent-rgb),.45)}
 .tipohead{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:8px}
@@ -784,6 +785,8 @@ section.cfg{padding:6px 6px 14px}
     <label class="lbl">Effet verre <b id="blurVal"></b></label>
     <input type="range" id="blurRange" min="0" max="40" step="1">
     <p class="muted" style="margin:12px 2px 0">Le thème est propre à chaque appareil.</p>
+    <label class="lbl">Langue</label>
+    <div class="seg" id="segLang"><button data-v="fr">Français</button><button data-v="en">English</button><button data-v="auto">Auto</button></div>
 
     <h3 class="st">Notifications</h3>
     <div class="switchrow" style="margin-top:8px"><label class="toggle"><input type="checkbox" id="nLocal"><span></span></label><span>Sur cet appareil</span></div>
@@ -844,6 +847,217 @@ section.cfg{padding:6px 6px 14px}
 
 <script>
 "use strict";
+/* ===================== langue (français / anglais) ===================== */
+const LANGKEY = "forgeMobileLang";
+let LANG_PREF = "auto";
+try { LANG_PREF = localStorage.getItem(LANGKEY) || "auto"; } catch (e) {}
+const LANG = LANG_PREF === "auto" ? ((navigator.language || "fr").toLowerCase().startsWith("fr") ? "fr" : "en") : LANG_PREF;
+document.documentElement.lang = LANG;
+const EN = {
+  // en-tête, onglets, sections
+  "Réglages": "Settings", "Galerie": "Gallery", "Modèle": "Model", "Négatif": "Negative", "Génération": "Generation",
+  "File d'attente": "Queue", "Couleurs": "Colors", "Coloration des tags": "Tag highlighting", "Persos": "Characters", "Poses": "Poses",
+  "Tenues": "Outfits", "Lieux": "Places", "Lumière": "Lighting", "Expressions": "Expressions", "Apparence": "Appearance",
+  "Persos & LoRAs": "Characters & LoRAs", "Poses & cadrage": "Poses & framing", "Lieux & fonds": "Places & backgrounds",
+  "Lumière & ambiance": "Lighting & mood", "Autres": "Other",
+  "Rangés automatiquement d'après tes images. Toucher = ajouter / retirer du prompt.": "Sorted automatically from your images. Tap = add / remove from the prompt.",
+  "= active aussi le LoRA qui va avec.": "= also enables the matching LoRA.",
+  "Filtrer…": "Filter…", "Rien ici pour l'instant.": "Nothing here yet.", "Génère quelques images : les tags apparaîtront ici.": "Generate a few images: tags will show up here.",
+  // prompt / TIPO / vérification
+  "✨ Enrichir": "✨ Enrich", "💬 Décrire": "💬 Describe", "léger": "light", "moyen": "medium", "généreux": "generous",
+  "Proposer": "Suggest", "Tout ajouter": "Add all", "Encore ↻": "Again ↻", "Suggérer des tags qui vont avec ton prompt": "Suggest tags that fit your prompt",
+  "Décrire une idée en une phrase": "Describe an idea in one sentence", "Réflexion…": "Thinking…", "Installer TIPO": "Install TIPO",
+  "TIPO n'est pas encore installé sur le PC.": "TIPO is not installed on the PC yet.", "TIPO n'est pas installé": "TIPO is not installed",
+  "Installation de TIPO sur le PC… (1-2 min)": "Installing TIPO on the PC… (1-2 min)", "TIPO installé ✓": "TIPO installed ✓",
+  "Premier lancement : chargement du modèle (la toute première fois il se télécharge, ~1 Go)…": "First run: loading the model (downloaded the very first time, ~1 GB)…",
+  "Rien de nouveau à proposer, essaie « Encore » ou « généreux ».": "Nothing new to suggest, try “Again” or “generous”.",
+  "TIPO n'a pas répondu.": "TIPO did not answer.", "L'installation a échoué :": "Installation failed:",
+  "✓ Prompt propre": "✓ Clean prompt", "Corriger": "Fix", "Ranger les virgules": "Tidy commas", "Prompt nettoyé": "Prompt cleaned",
+  "parenthèses mal fermées": "unbalanced parentheses",
+  // LoRAs
+  "LoRAs": "LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
+  "Réactiver": "Re-enable", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
+  "Importer un LoRA (.safetensors)": "Import a LoRA (.safetensors)", "Chercher sur Civitai": "Search on Civitai", "Ajouter au prompt": "Add to prompt",
+  "Déposer le LoRA ici": "Drop the LoRA here", ".safetensors · il sera copié dans models/Lora": ".safetensors · it will be copied to models/Lora",
+  "Dépose un fichier .safetensors": "Drop a .safetensors file", "Activer": "Enable", "Activer + mots-clés": "Enable + trigger words",
+  "LoRAs Civitai": "Civitai LoRAs", "Rechercher (perso, style, pose…)": "Search (character, style, pose…)", "Tous": "All",
+  "Plus téléchargés": "Most downloaded", "Mieux notés": "Highest rated", "Récents": "Newest", "Plus de résultats": "More results",
+  "Aucun résultat.": "No results.", "Recherche…": "Searching…", "Recherche impossible": "Search failed", "Télécharger": "Download",
+  "Téléchargement…": "Downloading…", "Installé ✓": "Installed ✓", "✓ installé": "✓ installed", "Téléchargement impossible": "Download failed",
+  "Déjà installé": "Already installed", "Ce LoRA existe déjà": "This LoRA already exists", "Fichier .safetensors attendu": ".safetensors file expected",
+  "Fichier vide ou incomplet": "Empty or incomplete file", "clé API Civitai requise (Réglages)": "Civitai API key required (Settings)",
+  // format / génération / hires / modèle / presets
+  "Format": "Format", "Léger · rapide": "Light · fast", "Natif SDXL": "SDXL native", "Largeur": "Width", "Hauteur": "Height", "Inverser": "Swap",
+  "Nombre d'images": "Number of images", "générées à la suite": "generated in a row", "Moins": "Less", "Plus": "More", "🎲 Aléatoire": "🎲 Random",
+  "Activer le hires fix": "Enable hires fix", "Décodage VAE en tuiles": "Tiled VAE decoding", "évite que Forge gèle sur le VAE en grande taille (8 Go)": "prevents Forge from freezing on the VAE at large sizes (8 GB)",
+  "désactivé": "off", "Checkpoint": "Checkpoint", "Presets": "Presets", "Nom du preset…": "Preset name…", "Enregistrer": "Save", "Inclure :": "Include:",
+  "prompt": "prompt", "négatif": "negative",
+  "Toujours enregistrés : format, hires, sampler, steps, CFG, nombre d'images (jamais la seed). Même nom = mise à jour.": "Always saved: format, hires, sampler, steps, CFG, number of images (never the seed). Same name = update.",
+  "Aucun preset pour l'instant.": "No presets yet.", "Donne un nom au preset": "Give the preset a name", "Enregistrement impossible": "Could not save",
+  "Suppression impossible": "Could not delete", "Supprimer": "Delete", "Changement de modèle…": "Switching model…",
+  "Modèle sélectionné · chargé à la prochaine génération": "Model selected · loaded on next generation", "Échec du changement de modèle": "Model switch failed",
+  // file d'attente / dock
+  "Générer": "Generate", "Ajouter à la file": "Add to queue", "Ajouter à la file sans la relancer": "Add to queue without resuming it",
+  "Ajouté à la file": "Added to queue", "Génération lancée": "Generation started", "Génération lancée depuis Forge": "Generation started from Forge",
+  "Génération en cours": "Generating", "génération en cours": "generating", "En attente": "Pending", "En attente · en pause": "Pending · paused",
+  "Terminées": "Done", "Pause": "Pause", "Reprendre": "Resume", "Vider la file": "Clear queue", "Tout arrêter": "Stop all", "Vider": "Clear",
+  "Vider la file d'attente ?": "Clear the queue?", "Vider la file et arrêter l'image en cours ?": "Clear the queue and stop the current image?",
+  "▶ Reprendre la file": "▶ Resume queue", "File relancée": "Queue resumed", "Pause après l'image en cours (la file est gardée)": "Pause after the current image (queue is kept)",
+  "Pause après l'image en cours · la file est gardée": "Pause after the current image · queue is kept", "Image annulée · la file continue": "Image cancelled · queue continues",
+  "Interruption demandée": "Interrupt requested", "Image passée": "Image skipped", "Passer l'image": "Skip image", "Interrompre": "Interrupt",
+  "Relancer": "Run again", "Remettre ce prompt et ces réglages": "Restore this prompt and settings", "⤺ Remettre ce prompt et ces réglages": "⤺ Restore this prompt and settings",
+  "Voir le prompt complet": "Show full prompt", "Voir l'image": "View image", "Prompt et réglages remis": "Prompt and settings restored",
+  "annulée": "cancelled", "erreur": "error", "terminé": "done", "seed aléatoire": "random seed", "sans hires": "no hires", "Négatif :": "Negative:",
+  "Glisser pour déplacer · double-clic pour replacer": "Drag to move · double-click to reset", "Déplacer": "Move", "Dernière image": "Last image",
+  "Aller à la galerie": "Go to gallery", "Remonter au prompt": "Back to prompt", "Revenir au prompt": "Back to prompt", "Masquer": "Hide",
+  "Forge ne s'est pas arrêté depuis 45 s : il semble bloqué.": "Forge has not stopped for 45 s: it looks stuck.",
+  "Une génération a échoué.": "A generation failed.", "Forge · terminé": "Forge · done", "Forge · erreur": "Forge · error",
+  "(prompt vide)": "(empty prompt)", "ex. sitting on a rooftop at night in the rain": "e.g. sitting on a rooftop at night in the rain", "ex. forge-k3j9x2p7": "e.g. forge-k3j9x2p7", "Génération en cours,": "Generating,",
+  // galerie
+  "Rechercher…": "Search…", "Taille des images": "Image size", "Petites": "Small", "Moyennes": "Medium", "Grandes": "Large",
+  "Favoris seulement": "Favorites only", "Filtres": "Filters", "Plus de choix": "More", "Sélectionner des images": "Select images",
+  "Nettoyer (doublons, grilles)": "Clean up (duplicates, grids)", "Agrandir la galerie (Échap pour revenir)": "Expand gallery (Esc to go back)",
+  "Revenir à la vue normale (Échap)": "Back to normal view (Esc)", "Revenir au prompt (Échap)": "Back to prompt (Esc)", "✎ Prompt": "✎ Prompt",
+  "Toutes les dates": "All dates", "Tous les LoRAs": "All LoRAs", "Tous les modèles": "All models", "Récentes d'abord": "Newest first",
+  "Anciennes d'abord": "Oldest first", "Tout effacer": "Clear all", "Tags fréquents": "Frequent tags", "anciennes d'abord": "oldest first",
+  "Aucune image ne correspond.": "No matching images.", "Tout": "All", "Corbeille": "Trash", "Annuler": "Undo", "Page précédente": "Previous page",
+  "Page suivante": "Next page", "Voir seulement ce jour": "Show only this day", "Revenir à toutes les dates": "Back to all dates",
+  "Aujourd'hui": "Today", "Hier": "Yesterday", "Corbeille impossible": "Could not move to trash", "Restauration impossible": "Could not restore",
+  "Image introuvable": "Image not found",
+  // visionneuse
+  "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
+  "Reprendre le prompt": "Reuse prompt", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
+  "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
+  "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
+  // nettoyage
+  "Nettoyer": "Clean up", "Doublons exacts": "Exact duplicates", "Grilles": "Grids", "Analyse…": "Analyzing…", "Aucun": "None", "Aucune": "None",
+  "Vide": "Empty", "Rien n'est supprimé : tout part dans un dossier": "Nothing is deleted: everything goes to a", "à côté de tes images, que tu vides quand tu veux.": "folder next to your images, empty it whenever you want.",
+  "Erreur d'analyse": "Analysis error", "Nettoyage impossible": "Cleanup failed",
+  // réglages
+  "Couleur": "Color", "Mode": "Mode", "Sombre": "Dark", "Clair": "Light", "Auto": "Auto", "Fond": "Background", "Animé": "Animated", "Fixe": "Still",
+  "Uni": "Plain", "Effet verre": "Glass effect", "Le thème est propre à chaque appareil.": "The theme is per device.", "Langue": "Language",
+  "Sur cet appareil": "On this device", "Push ntfy · même écran éteint": "ntfy push · even with screen off", "Topic aléatoire": "Random topic",
+  "Fin de la file": "End of queue", "Chaque génération": "Each generation", "Off": "Off", "Envoyer un test": "Send a test", "Installe l'appli": "Install the",
+  "sur ton tél et abonne-toi au même topic. Le message ne contient ni image ni prompt, juste « terminé · 4 images ».": "app on your phone and subscribe to the same topic. Messages contain no image and no prompt, just “done · 4 images”.",
+  "Notifications enregistrées": "Notifications saved", "Test envoyé à ntfy": "Test sent to ntfy", "Échec du test": "Test failed",
+  "Indique d'abord un topic (ou le PC n'arrive pas à joindre ntfy)": "Set a topic first (or the PC cannot reach ntfy)",
+  "Notifications refusées par le navigateur": "Notifications blocked by the browser", "Les notifications sont activées sur cet appareil.": "Notifications are enabled on this device.",
+  "Il faut ouvrir la page en https": "The page must be opened over https",
+  "Indisponible en http:// : ouvre l'adresse https de « tailscale serve » (voir Appli).": "Not available over http://: open the https address from “tailscale serve” (see App).",
+  "Quand l'appli est en arrière-plan. Android peut la mettre en veille : ntfy est plus fiable écran éteint.": "When the app is in the background. Android may suspend it: ntfy is more reliable with the screen off.",
+  "Clé API (pour les LoRAs qui demandent un compte)": "API key (for LoRAs that require an account)",
+  "Civitai → ton compte → Settings → API Keys → Add API key. Elle reste sur le PC.": "Civitai → your account → Settings → API Keys → Add API key. It stays on the PC.",
+  "Colle d'abord ta clé": "Paste your key first", "Clé Civitai enregistrée sur le PC": "Civitai key saved on the PC",
+  "clé enregistrée ✓ (coller pour remplacer)": "key saved ✓ (paste to replace)", "colle ta clé ici": "paste your key here",
+  "Serveur": "Server", "Libérer la VRAM": "Free VRAM", "Redémarrer Forge": "Restart Forge", "Libérer": "Free", "Redémarrer": "Restart",
+  "Libérer la VRAM décharge le modèle (pour jouer, par ex.) : il se recharge à la prochaine génération. Redémarrer relance Forge entièrement (~1 min) ; la file en attente est conservée, en pause.": "Free VRAM unloads the model (e.g. to play games): it reloads on the next generation. Restart fully restarts Forge (~1 min); the pending queue is kept, paused.",
+  "Décharger le modèle de la carte graphique ?": "Unload the model from the GPU?", "Redémarrer Forge ?": "Restart Forge?",
+  "Une image est en cours : redémarrer quand même ?": "An image is being generated: restart anyway?", "Attends la fin de la génération": "Wait for the generation to finish",
+  "Impossible de libérer la VRAM": "Could not free VRAM", "Forge injoignable": "Forge unreachable", "Forge est relancé ✓": "Forge is back ✓",
+  "Forge redémarre… (environ 1 min, la page se rechargera toute seule)": "Forge is restarting… (about 1 min, the page will reload by itself)",
+  "Forge ne répond toujours pas après 5 min : regarde la console sur le PC.": "Forge still not responding after 5 min: check the console on the PC.",
+  "Appli": "App", "Installer Forge sur cet appareil": "Install Forge on this device", "Forge tourne déjà en appli. ✓": "Forge is already running as an app. ✓",
+  "Safari → bouton Partager → « Sur l'écran d'accueil ».": "Safari → Share → “Add to Home Screen”.",
+  "Menu du navigateur ⋮ → « Installer l'application » / « Ajouter à l'écran d'accueil ».": "Browser menu ⋮ → “Install app” / “Add to Home screen”.",
+  "L'installation demande HTTPS. Sur le PC : « tailscale serve --bg 7860 », puis ouvre sur le tél l'adresse https://…ts.net/mobile/ qu'il affiche (Tailscale allumé sur le tél).": "Installing requires HTTPS. On the PC: “tailscale serve --bg 7860”, then open the https://…ts.net/mobile/ address it shows on your phone (with Tailscale on).",
+  "L'API de Forge est désactivée : ajoute --api dans COMMANDLINE_ARGS (webui-user.bat) puis relance Forge.": "The Forge API is disabled: add --api to COMMANDLINE_ARGS (webui-user.bat) and restart Forge.",
+  "synchronisé": "synced", "modifié…": "edited…", "erreur de synchro": "sync error", "PC injoignable": "PC unreachable",
+  "Erreur": "Error", "Action impossible": "Action failed", "Génération en cours (serveur)": "Generation in progress",
+};
+const EN_PAT = [
+  [/^(⚠ )?(\d+) doublons? \((.+)\)$/, (m, w, n, l) => `${w || ""}${n} duplicate${n > 1 ? "s" : ""} (${l})`],
+  [/^(⚠ )?(\d+) virgules? en trop$/, (m, w, n) => `${w || ""}${n} extra comma${n > 1 ? "s" : ""}`],
+  [/^(⚠ )?parenthèses mal fermées$/, (m, w) => `${w || ""}unbalanced parentheses`],
+  [/^(⚠ )?poids sans parenthèses : (.+)$/, (m, w, x) => `${w || ""}weight without parentheses: ${x}`],
+  [/^(⚠ )?(.+) est dans le prompt ET dans les LoRAs \(le poids du prompt l'emporte\)$/, (m, w, x) => `${w || ""}${x} is in the prompt AND in LoRAs (the prompt weight wins)`],
+  [/^(\d+) images? sur (\d+)$/, (m, a, b) => `${a} of ${b} images`],
+  [/^(\d+) filtrées?$/, (m, a) => `${a} filtered`],
+  [/^(\d+) images?$/, (m, a) => `${a} image${a > 1 ? "s" : ""}`],
+  [/^(\d+) images?\.$/, (m, a) => `${a} image${a > 1 ? "s" : ""}.`],
+  [/^✓ (\d+) images?$/, (m, a) => `✓ ${a} image${a > 1 ? "s" : ""}`],
+  [/^(\d+) images? prêtes?$/, (m, a) => `${a} image${a > 1 ? "s" : ""} ready`],
+  [/^(\d+) tags? ajoutés?$/, (m, a) => `${a} tag${a > 1 ? "s" : ""} added`],
+  [/^(\d+) (images?|fichiers?) à la corbeille$/, (m, a) => `${a} file${a > 1 ? "s" : ""} moved to trash`],
+  [/^(\d+) images? restaurées?$/, (m, a) => `${a} image${a > 1 ? "s" : ""} restored`],
+  [/^(\d+) suggestions?$/, (m, a) => `${a} suggestion${a > 1 ? "s" : ""}`],
+  [/^touche pour ajouter$/, () => "tap to add"],
+  [/^(\d+) sélectionnées?$/, (m, a) => `${a} selected`],
+  [/^(\d+) en attente$/, (m, a) => `${a} pending`],
+  [/^\+(\d+)$/, (m, a) => `+${a}`],
+  [/^file en pause$/, () => "queue paused"],
+  [/^pause$/, () => "paused"],
+  [/^Ajouter (\d+) images à la file$/, (m, a) => `Add ${a} images to queue`],
+  [/^Générer (\d+) images$/, (m, a) => `Generate ${a} images`],
+  [/^Encore (\d+) dans la file\.$/, (m, a) => `${a} more in the queue.`],
+  [/^Import de (.+)$/, (m, a) => `Importing ${a}`],
+  [/^LoRA (.+) activé$/, (m, a) => `LoRA ${a} enabled`],
+  [/^LoRA « (.+) » (ajouté|installé)$/, (m, a, b) => `LoRA “${a}” ${b === "ajouté" ? "added" : "installed"}`],
+  [/^« (.+) » (enregistré|mis à jour|supprimé|chargé)$/, (m, a, b) => `“${a}” ${{ "enregistré": "saved", "mis à jour": "updated", "supprimé": "deleted", "chargé": "loaded" }[b]}`],
+  [/^Supprimer « (.+) » \?$/, (m, a) => `Delete “${a}”?`],
+  [/^Échec de (.+) : (.+)$/, (m, a, b) => `${a} failed: ${tr(b)}`],
+  [/^(.+) existe déjà$/, (m, a) => `${a} already exists`],
+  [/^étape (\d+)\/(\d+)$/, (m, a, b) => `step ${a}/${b}`],
+  [/^([\d,.]+) (Mo|Go)$/, (m, a, u) => `${a.replace(",", ".")} ${u === "Mo" ? "MB" : "GB"}`],
+  [/^([\d,.]+) Go libres$/, (m, a) => `${a.replace(",", ".")} GB free`],
+  [/^VRAM libérée$/, () => "VRAM freed"],
+  [/^VRAM : ([\d,.]+) \/ ([\d,.]+) Go libres$/, (m, a, b) => `VRAM: ${a.replace(",", ".")} / ${b.replace(",", ".")} GB free`],
+  [/^lancé il y a (.+)$/, (m, a) => `started ${a} ago`],
+  [/^(\d+) fichiers? en double$/, (m, a) => `${a} duplicate file${a > 1 ? "s" : ""}`],
+  [/^(.+) \(on garde l'original\)$/, (m, a) => `${tr(a)} (originals are kept)`],
+  [/^(\d+) grilles?$/, (m, a) => `${a} grid${a > 1 ? "s" : ""}`],
+  [/^(\d+) fichiers?$/, (m, a) => `${a} file${a > 1 ? "s" : ""}`],
+  [/^([\d,.]+ [MG]o)\. Ce sont tes images.*$/, (m, a) => `${tr(a)}. These are your already-saved images, assembled by Forge when you generate several at once. The queue no longer creates them.`],
+  [/^Négatif : ([\s\S]*)$/, (m, a) => `Negative: ${a}`],
+  [/^(\d+) min$/, (m, a) => `${a} min`],
+  [/^Retirer de la liste$/, () => "Remove from list"],
+  [/^(\d+) actifs?$/, (m, a) => `${a} active`],
+  [/^aucun$/, () => "none"],
+  [/^(\d+) images? dans la file$/, (m, a) => `${a} image${a > 1 ? "s" : ""} in the queue`],
+];
+function trOne(k) {
+  if (Object.prototype.hasOwnProperty.call(EN, k)) return EN[k];
+  for (const [re, fn] of EN_PAT) { const m = k.match(re); if (m) return fn(...m); }
+  return null;
+}
+function tr(s) {
+  if (LANG === "fr" || !s) return s;
+  const k = s.trim(); if (!k) return s;
+  let out = trOne(k);
+  if (out == null && k.includes(" · ")) {  // phrases composées : on traduit morceau par morceau
+    const parts = k.split(" · "); let any = false;
+    const mapped = parts.map(p => { const t = trOne(p); if (t != null) { any = true; return t; } return p; });
+    if (any) out = mapped.join(" · ");
+  }
+  return out == null ? s : s.replace(k, out);
+}
+const I18N_SKIP = "[data-noi18n], textarea, .hlb, #vPrompt, #vNeg, .qdetail pre, .ql, .qlabel, #nowLabel, .lora .name, #gTags, #tlTags, #vTags, #vLoras, #tipoChips, #ac, #presetList, #actLoras, #loraOff, #model, #gLora, #gModel, .civcard .cn, #civDl span:first-child, .vhead h3, #vKv dd, #loraResults, .results, .tile";
+function trTree(root) {
+  if (LANG === "fr" || !root) return;
+  if (root.nodeType === 3) { const p = root.parentElement; if (p && !p.closest(I18N_SKIP)) { const t = tr(root.data); if (t !== root.data) root.data = t; } return; }
+  if (root.nodeType !== 1 || root.closest?.(I18N_SKIP)) return;
+  for (const a of ["placeholder", "title", "aria-label"]) { const v = root.getAttribute?.(a); if (v) { const t = tr(v); if (t !== v) root.setAttribute(a, t); } }
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+    acceptNode: n => (n.nodeType === 1 ? n : n.parentElement)?.closest(I18N_SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+  });
+  let n;
+  while ((n = w.nextNode())) {
+    if (n.nodeType === 3) { const t = tr(n.data); if (t !== n.data) n.data = t; }
+    else for (const a of ["placeholder", "title", "aria-label"]) { const v = n.getAttribute(a); if (v) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } }
+  }
+}
+function startI18n() {
+  if (LANG === "fr") return;
+  trTree(document.body);
+  new MutationObserver(ms => {
+    for (const m of ms) {
+      if (m.type === "characterData") trTree(m.target);
+      else if (m.type === "attributes") trTree(m.target);
+      else m.addedNodes.forEach(trTree);
+    }
+  }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["placeholder", "title", "aria-label"] });
+}
+
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
@@ -1736,7 +1950,7 @@ function renderFilterState() {
 }
 function fillFacetSelect(sel, list, current, allLabel) {
   sel.textContent = "";
-  const o0 = document.createElement("option"); o0.value = ""; o0.textContent = allLabel; sel.appendChild(o0);
+  const o0 = document.createElement("option"); o0.value = ""; o0.textContent = tr(allLabel); sel.appendChild(o0);
   let has = false;
   for (const [name, n] of list) {
     const o = document.createElement("option"); o.value = name; o.textContent = `${name} · ${n}`; sel.appendChild(o);
@@ -1787,7 +2001,7 @@ function dayLabel(d) {
   const diff = Math.round((today - dt) / 864e5);
   if (diff === 0) return "Aujourd'hui";
   if (diff === 1) return "Hier";
-  const s = dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", ...(y !== today.getFullYear() ? { year: "numeric" } : {}) });
+  const s = dt.toLocaleDateString(LANG === "en" ? "en-US" : "fr-FR", { weekday: "long", day: "numeric", month: "long", ...(y !== today.getFullYear() ? { year: "numeric" } : {}) });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function renderGallery() {
@@ -2226,7 +2440,7 @@ async function loadPresets() {
 }
 function renderPresets() {
   const box = $("#presetList"); box.textContent = "";
-  if (!presets.length) { const m = document.createElement("span"); m.className = "muted"; m.textContent = "Aucun preset pour l'instant."; box.appendChild(m); }
+  if (!presets.length) { const m = document.createElement("span"); m.className = "muted"; m.textContent = tr("Aucun preset pour l'instant."); box.appendChild(m); }
   for (const p of presets) {
     const c = document.createElement("button"); c.className = "chip" + (p.name === presetLoaded ? " on" : "");
     c.append(p.name + " ");
@@ -2375,7 +2589,7 @@ function renderTaglib() {
     b.onclick = () => toggleTag(t);
     box.appendChild(b);
   }
-  if (!box.children.length) { const m = document.createElement("span"); m.className = "muted"; m.textContent = TL.images ? "Rien ici pour l'instant." : "Génère quelques images : les tags apparaîtront ici."; box.appendChild(m); }
+  if (!box.children.length) { const m = document.createElement("span"); m.className = "muted"; m.textContent = tr(TL.images ? "Rien ici pour l'instant." : "Génère quelques images : les tags apparaîtront ici."); box.appendChild(m); }
   $("#tlHint").textContent = TL.cats.reduce((a, c) => a + c.tags.length, 0) || "";
 }
 function chipEl(text, on) { const c = document.createElement("button"); c.className = "chip" + (on ? " on" : ""); c.textContent = text; return c; }
@@ -2736,6 +2950,8 @@ function bind() {
 
 async function init() {
   buildThemeSheet(); applyTheme(); setupSections(); renderRatios(); bind(); bindGallery(); bindAutocomplete(); bindSettings(); guardRanges(); bindImport(); bindNow(); bindTabs(); bindHighlight(); bindDock(); bindCivitai(); bindWide(); bindPhoto(); bindTipo();
+  $$("#segLang button").forEach(b => { b.classList.toggle("on", b.dataset.v === LANG_PREF); b.onclick = () => { try { localStorage.setItem(LANGKEY, b.dataset.v); } catch (e) {} location.reload(); }; });
+  startI18n();
   let hlOn = true; try { hlOn = localStorage.getItem(HLKEY) !== "0"; } catch (e) {}
   setHl(hlOn); $("#hlToggle").onclick = () => setHl(document.body.classList.contains("nohl"));
   $("#prompt").addEventListener("input", () => { clearTimeout(window._pcT); window._pcT = setTimeout(renderCheck, 450); });

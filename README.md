@@ -4,12 +4,27 @@ A modern, touch-friendly web UI for **Stable Diffusion WebUI Forge**: generate f
 
 It installs as a regular Forge extension and serves its own page at `/mobile/`, next to the classic Gradio UI (which keeps working).
 
-> The interface is in **French** for now.
+> The UI is available in **English** and **French** (auto-detected from your browser, switchable in ⚙️ Settings).
 
-| Desktop | Mobile |
+## Screenshots
+
+### Desktop
+
+![Studio](docs/desktop.jpg)
+
+| Wide gallery | Image viewer |
 |---|---|
-| ![Desktop](docs/desktop.jpg) | ![Mobile](docs/mobile-studio.jpg) |
-| ![Gallery](docs/desktop-gallery.jpg) | ![Mobile gallery](docs/mobile-gallery.jpg) ![Photo mode](docs/mobile-photo.jpg) |
+| ![Gallery](docs/desktop-gallery.jpg) | ![Viewer](docs/desktop-viewer.jpg) |
+
+### Mobile
+
+<p align="center">
+  <img src="docs/mobile-studio.jpg" width="260" alt="Studio">
+  &nbsp;
+  <img src="docs/mobile-gallery.jpg" width="260" alt="Gallery tab">
+  &nbsp;
+  <img src="docs/mobile-photo.jpg" width="260" alt="Photo mode">
+</p>
 
 ## Features
 
@@ -37,6 +52,17 @@ It installs as a regular Forge extension and serves its own page at `/mobile/`, 
 - Mobile: dedicated **Gallery tab** and a **photo mode** (swipe, pinch-zoom, swipe-down to close)
 - Trash instead of delete (`outputs/_corbeille`, with undo), duplicate & grid cleanup
 
+## Requirements
+
+- **Stable Diffusion WebUI Forge** (tested on `f2.0.1v1.10.1`, Python 3.10) started with `--api`
+- An SDXL / Illustrious / Pony checkpoint (SD 1.5 works too, the tag tools are just tuned for Danbooru-style prompts)
+- A recent browser: Chrome / Edge / Firefox / Safari, desktop or mobile
+- *Optional:* [Tailscale](https://tailscale.com) to reach it from your phone outside your LAN
+- *Optional:* ~2 GB of free RAM and ~1 GB of disk for **TIPO** (runs on CPU, no VRAM used)
+- *Optional:* a [Civitai API key](https://civitai.com/user/account) for LoRA downloads that require an account
+
+No extra Python packages are needed for the core features: everything uses what Forge already ships.
+
 ## Install
 
 1. In Forge: **Extensions → Install from URL** → paste this repository URL → Install
@@ -54,7 +80,7 @@ For HTTPS (needed to install it as an app / for browser notifications), run `tai
 
 ### Optional
 
-- **TIPO**: click ✨ *Enrichir* once, then *Installer TIPO* (installs `tipo-kgen` into Forge's Python, the model ~1 GB is downloaded on first use).
+- **TIPO**: click ✨ *Enrich* once, then *Install TIPO* (installs `tipo-kgen` into Forge's Python, the model ~1 GB is downloaded on first use).
 - **Civitai**: add your API key in ⚙️ to download LoRAs that require an account.
 - **ntfy**: set a topic in ⚙️ and subscribe to it in the ntfy app.
 

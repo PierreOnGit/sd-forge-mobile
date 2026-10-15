@@ -1463,11 +1463,16 @@ def _tipo_suggest(prompt, describe="", length="short", seed=0):
 
     if not _tipo_available():
         raise HTTPException(status_code=409, detail="TIPO n'est pas installé")
+    import kgen.executor.tipo as tipo_mod
     from kgen.executor.tipo import parse_tipo_request, tipo_runner
     from kgen.formatter import seperate_tags
 
-    if length not in ("very_short", "short", "long", "very_long"):
-        length = "short"
+    # kgen coupe les ajouts quand le prompt d'entrée est déjà long (bug : il compare à la limite des phrases) :
+    # on lève ses limites et on plafonne nous-mêmes le nombre de suggestions.
+    tipo_mod.TARGET_TIPO_MAX = {k: 1000 for k in ("very_short", "short", "long", "very_long")}
+    tipo_mod.TARGET_TIPO_NL_MAX = {k: 1000 for k in ("very_short", "short", "long", "very_long")}
+    cap = {"very_short": 6, "short": 12, "long": 24}.get(length, 12)
+    length = {"very_short": "long", "short": "very_long", "long": "very_long"}.get(length, "very_long")
     toks = _lib_tokens(prompt)
     tag_map = seperate_tags(toks)
     describe = (describe or "").strip()
@@ -1501,7 +1506,9 @@ def _tipo_suggest(prompt, describe="", length="short", seed=0):
             have.add(tl)
             cat = "persos" if key in ("characters", "copyrights") else "style" if key == "artist" else (_tag_category(tl, dan) or "autres")
             out.append({"tag": tl, "cat": cat})
-    return {"suggestions": out, "seconds": round(took, 1)}
+    if not out:
+        _log(f"TIPO : aucune suggestion (entrée {len(toks)} tags, sortie {sum(len(v) for v in parsed.values() if isinstance(v, list))})")
+    return {"suggestions": out[:cap], "seconds": round(took, 1)}
 
 
 # ---------------------------------------------------------------- serveur (redémarrer / libérer la VRAM)
