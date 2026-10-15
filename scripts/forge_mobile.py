@@ -8,6 +8,7 @@ shared_state.json, à la racine de l'extension.
 """
 
 import hashlib
+import io
 import json
 import os
 import re
@@ -666,6 +667,8 @@ def _api_base():
 def _run_job(job):
     payload = dict(job["payload"])
     payload.update(save_images=True, send_images=False, do_not_save_grid=True)
+    # pas de copie JPG automatique des grosses images (option Forge « Save copy of large images as JPG »)
+    payload["override_settings"] = dict(payload.get("override_settings") or {}, export_for_4chan=False)
     req = urllib.request.Request(_api_base() + "/sdapi/v1/txt2img", data=json.dumps(payload).encode("utf-8"),
                                  headers={"Content-Type": "application/json"}, method="POST")
     with urllib.request.urlopen(req, timeout=None) as r:
@@ -1901,6 +1904,19 @@ def _register_routes(app):
     @app.get("/mobile/api/preview")
     def get_preview(path: str):
         return FileResponse(_cached_resize(_safe_image(path), "preview"), headers={"Cache-Control": "max-age=604800"})
+
+    @app.get("/mobile/api/jpg")
+    def get_jpg(path: str, q: int = 88):
+        """Export JPG compressé à la volée (pleine résolution, sans métadonnées), rien n'est écrit sur le disque."""
+        from PIL import Image
+
+        real = _safe_image(path)
+        buf = io.BytesIO()
+        with Image.open(real) as img:
+            img.convert("RGB").save(buf, "JPEG", quality=max(40, min(int(q), 95)), optimize=True, progressive=True)
+        name = urllib.parse.quote(real.stem + ".jpg")
+        return Response(buf.getvalue(), media_type="image/jpeg",
+                        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{name}"})
 
     @app.get("/mobile/api/image")
     def get_image(path: str):

@@ -767,6 +767,7 @@ section.cfg{padding:6px 6px 14px}
         <button class="btn" id="reuse">Reprendre le prompt</button>
         <button class="btn" id="reuseAll">Prompt + réglages + seed</button>
         <a class="btn" id="viewerOpen" target="_blank" rel="noopener">Ouvrir l'original</a>
+        <a class="btn" id="vJpg" download title="Télécharger une copie JPG compressée (sans métadonnées)">JPG compressé</a>
         <button class="btn danger" id="vTrash">Corbeille</button>
       </div>
     </div>
@@ -912,7 +913,7 @@ const EN = {
   "Aller à la galerie": "Go to gallery", "Remonter au prompt": "Back to prompt", "Revenir au prompt": "Back to prompt", "Masquer": "Hide",
   "Forge ne s'est pas arrêté depuis 45 s : il semble bloqué.": "Forge has not stopped for 45 s: it looks stuck.",
   "Une génération a échoué.": "A generation failed.", "Forge · terminé": "Forge · done", "Forge · erreur": "Forge · error",
-  "(prompt vide)": "(empty prompt)", "ex. sitting on a rooftop at night in the rain": "e.g. sitting on a rooftop at night in the rain", "ex. forge-k3j9x2p7": "e.g. forge-k3j9x2p7", "Génération en cours,": "Generating,",
+  "(prompt vide)": "(empty prompt)", "JPG compressé": "Compressed JPG", "Télécharger une copie JPG compressée (sans métadonnées)": "Download a compressed JPG copy (no metadata)", "ex. sitting on a rooftop at night in the rain": "e.g. sitting on a rooftop at night in the rain", "ex. forge-k3j9x2p7": "e.g. forge-k3j9x2p7", "Génération en cours,": "Generating,",
   // galerie
   "Rechercher…": "Search…", "Taille des images": "Image size", "Petites": "Small", "Moyennes": "Medium", "Grandes": "Large",
   "Favoris seulement": "Favorites only", "Filtres": "Filters", "Plus de choix": "More", "Sélectionner des images": "Select images",
@@ -2079,6 +2080,7 @@ function openViewer(i, solo = null) {
   const it = solo || gItems[i]; if (!it) return; vIndex = solo ? -1 : i;
   placeMeta();
   const url = "/mobile/api/image?path=" + encodeURIComponent(it.path);
+  $("#vJpg").href = "/mobile/api/jpg?path=" + encodeURIComponent(it.path);
   if (!photoMode()) {
   // aperçu léger tout de suite, puis l'original en pleine résolution dès qu'il est chargé
   const vimg = $("#viewerImg"), token = (vimg._tok = (vimg._tok || 0) + 1);
