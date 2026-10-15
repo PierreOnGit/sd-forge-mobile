@@ -1,0 +1,13 @@
+# runtime data (personal, never commit)
+shared_state.json
+presets.json
+settings.json
+queue_history.json
+gallery_index.json
+favorites.json
+lora_info.json
+forge_mobile.log
+thumbs/
+*.tmp
+*.part
+__pycache__/
