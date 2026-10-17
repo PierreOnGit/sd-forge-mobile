@@ -27,7 +27,7 @@ Runtime files written next to the extension (all git-ignored): `shared_state.jso
 
 ## Server — key mechanics
 
-- **Queue**: a worker thread POSTs to `http://127.0.0.1:{port}/sdapi/v1/txt2img` with `save_images=True, do_not_save_grid=True` and `override_settings.export_for_4chan=False` (no auto JPG copies). History in `queue_history.json`; pending jobs survive restarts (the running one does not).
+- **Queue**: a worker thread POSTs to `http://127.0.0.1:{port}/sdapi/v1/txt2img` with `save_images=True, do_not_save_grid=True` and temporarily sets `shared.opts.data["export_for_4chan"]=False` (no auto JPG copies — Forge ignores `override_settings` in the API). History in `queue_history.json`; pending jobs survive restarts (the running one does not).
 - **Tiled VAE**: Forge's built-in *Never OOM* script via `alwayson_scripts: {"Never OOM Integrated": {"args": [false, tiled]}}` (`hires.tiled`, default on). VAE "freezes" on 8 GB were NVIDIA sysmem fallback → advise *CUDA Sysmem Fallback Policy = Prefer No Sysmem Fallback* for Forge's `system\python\python.exe` only.
 - **Models**: `/mobile/api/models` reads files directly (Forge's `/sdapi/v1/sd-models` is broken in this build). Switch via `modules_forge.main_entry.checkpoint_change`.
 - **Restart**: `modules.restart.restart_program` (relies on webui.bat restart loop).

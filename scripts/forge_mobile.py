@@ -667,12 +667,23 @@ def _api_base():
 def _run_job(job):
     payload = dict(job["payload"])
     payload.update(save_images=True, send_images=False, do_not_save_grid=True)
-    # pas de copie JPG automatique des grosses images (option Forge « Save copy of large images as JPG »)
-    payload["override_settings"] = dict(payload.get("override_settings") or {}, export_for_4chan=False)
     req = urllib.request.Request(_api_base() + "/sdapi/v1/txt2img", data=json.dumps(payload).encode("utf-8"),
                                  headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=None) as r:
-        data = json.loads(r.read() or b"{}")
+    # Pas de copie JPG automatique des grosses images (« Save copy of large images as JPG »).
+    # Forge ignore override_settings dans l'API : on coupe l'option le temps du job, sans toucher à config.json.
+    data_opts = getattr(shared.opts, "data", None)
+    old_jpg = data_opts.get("export_for_4chan") if isinstance(data_opts, dict) else None
+    if isinstance(data_opts, dict):
+        data_opts["export_for_4chan"] = False
+    try:
+        with urllib.request.urlopen(req, timeout=None) as r:
+            data = json.loads(r.read() or b"{}")
+    finally:
+        if isinstance(data_opts, dict):
+            if old_jpg is None:
+                data_opts.pop("export_for_4chan", None)
+            else:
+                data_opts["export_for_4chan"] = old_jpg
     try:
         info = json.loads(data.get("info") or "{}")
         return info.get("seed")
