@@ -275,7 +275,8 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .more{text-align:center;padding:14px 0 4px}
 
 /* dock flottant */
-.dock{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;max-width:640px;margin:0 auto;padding:10px;border-radius:30px}
+.dock{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;max-width:640px;margin:0 auto;padding:10px;border-radius:30px;transition:transform .25s,opacity .2s}
+@media (max-width:1099px){ body.typing .dock{transform:translateY(140%);opacity:0;pointer-events:none} }
 .dockinfo{font-size:12px;color:var(--muted);text-align:center;margin:-2px 0 8px;display:none}
 .dockinfo.show{display:block}
 .dockrow{display:flex;gap:8px;align-items:center}
@@ -2173,20 +2174,32 @@ function photoZoomAt(x, y) {
   if (P.zoom > 1) { P.zoom = 1; P.zx = 0; P.zy = 0; img.style.transition = "transform .2s"; img.style.transform = ""; return; }
   const r = img.getBoundingClientRect(), z = 2.5;
   P.zoom = z; P.zx = -(x - r.left) * (z - 1); P.zy = -(y - r.top) * (z - 1);
+  if (img._clamp) img._clamp();
   img.style.transition = "transform .2s"; img.style.transform = `translate(${P.zx}px,${P.zy}px) scale(${z})`;
   const it = vItem(); if (it) { const full = new Image(); full.onload = () => { if (vItem() === it && P.zoom > 1) img.src = full.src; }; full.src = "/mobile/api/image?path=" + encodeURIComponent(it.path); }
 }
 function bindPhoto() {
   const ph = $("#photo");
   let st = null, lastTap = 0;
-  const imgBase = () => { const img = $$("#pTrack img")[1]; const sl = img.parentElement.getBoundingClientRect(); return { img, x: sl.left + img.offsetLeft, y: sl.top + img.offsetTop }; };
+  // position de l'image non transformée à l'écran (transform-origin 0 0 : rect = base + translate)
+  const imgBase = () => { const img = $$("#pTrack img")[1], r = img.getBoundingClientRect(); return { img, x: r.left - (P.zoom > 1 ? P.zx : 0), y: r.top - (P.zoom > 1 ? P.zy : 0) }; };
+  // garde l'image zoomée dans l'écran (centrée si elle est plus petite que l'écran)
+  const clampZoom = () => {
+    const img = $$("#pTrack img")[1], sl = img.parentElement, w = img.offsetWidth * P.zoom, h = img.offsetHeight * P.zoom;
+    const bx = (sl.clientWidth - img.offsetWidth) / 2, by = (sl.clientHeight - img.offsetHeight) / 2;
+    const fit = (v, size, view, b) => size <= view ? (view - size) / 2 - b : Math.min(-b, Math.max(view - size - b, v));
+    P.zx = fit(P.zx, w, sl.clientWidth, bx); P.zy = fit(P.zy, h, sl.clientHeight, by);
+  };
   const applyZoom = (anim) => { const img = $$("#pTrack img")[1]; img.style.transition = anim ? "transform .2s" : "none"; img.style.transform = P.zoom > 1 ? `translate(${P.zx}px,${P.zy}px) scale(${P.zoom})` : ""; };
+  $$("#pTrack img")[1]._clamp = clampZoom;
   const loadFull = () => { const it = vItem(), img = $$("#pTrack img")[1]; if (!it || img._full === it.path) return; img._full = it.path; const full = new Image(); full.onload = () => { if (vItem() === it) img.src = full.src; }; full.src = "/mobile/api/image?path=" + encodeURIComponent(it.path); };
   ph.addEventListener("touchstart", e => {
     if (e.target.closest(".pbar, .pinfo")) { st = null; return; }
     if (e.touches.length === 2) {
       const [a, b] = e.touches, base = imgBase();
-      st = { mode: "pinch", d0: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), z0: P.zoom, zx0: P.zx, zy0: P.zy,
+      if (P.zoom <= 1) { P.zx = 0; P.zy = 0; }
+      photoSetTrack(0, false);  // annule un début de glissement à un doigt
+      st = { mode: "pinch", d0: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1, z0: P.zoom, zx0: P.zx, zy0: P.zy, bx: base.x, by: base.y,
              cx: (a.clientX + b.clientX) / 2 - base.x, cy: (a.clientY + b.clientY) / 2 - base.y, t: Date.now() };
       clearTimeout(ph._tapT); lastTap = 0; return;
     }
@@ -2201,16 +2214,16 @@ function bindPhoto() {
       e.preventDefault();
       const [a, b] = e.touches, d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
       const z = Math.min(6, Math.max(1, st.z0 * d / st.d0));
-      const qx = (st.cx - st.zx0) / st.z0, qy = (st.cy - st.zy0) / st.z0;
-      P.zoom = z; P.zx = st.cx - qx * z; P.zy = st.cy - qy * z; applyZoom(false);
+      const qx = (st.cx - st.zx0) / st.z0, qy = (st.cy - st.zy0) / st.z0;  // point de l'image sous les doigts
+      const mx = (a.clientX + b.clientX) / 2 - st.bx, my = (a.clientY + b.clientY) / 2 - st.by;  // il suit les doigts
+      P.zoom = z; P.zx = mx - qx * z; P.zy = my - qy * z; applyZoom(false);
       return;
     }
     const t = e.touches[0], dx = t.clientX - st.x, dy = t.clientY - st.y;
     if (!st.mode) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; st.mode = P.zoom > 1 ? "pan" : Math.abs(dx) > Math.abs(dy) ? "h" : (dy > 0 ? "down" : "up"); }
     e.preventDefault();
     if (st.mode === "pan") {
-      P.zx = st.zx + dx; P.zy = st.zy + dy; const img = $$("#pTrack img")[1];
-      img.style.transition = "none"; img.style.transform = `translate(${P.zx}px,${P.zy}px) scale(${P.zoom})`;
+      P.zx = st.zx + dx; P.zy = st.zy + dy; clampZoom(); applyZoom(false);
     } else if (st.mode === "h") {
       const edge = (dx > 0 && !neighbor(-1) && !(gPage > 0 && !vSolo)) || (dx < 0 && !neighbor(1) && !(gPage < gPages() - 1 && !vSolo));
       photoSetTrack(edge ? dx / 3 : dx, false);
@@ -2223,9 +2236,12 @@ function bindPhoto() {
   ph.addEventListener("touchend", e => {
     if (!st) return;
     if (st.mode === "pinch") {
-      if (e.touches.length > 0) return;  // on attend que les deux doigts soient levés
-      st = null;
-      if (P.zoom < 1.05) { P.zoom = 1; P.zx = 0; P.zy = 0; applyZoom(true); } else loadFull();
+      if (P.zoom < 1.05) { P.zoom = 1; P.zx = 0; P.zy = 0; } else clampZoom();
+      applyZoom(true);
+      if (P.zoom > 1) loadFull();
+      // un doigt reste posé : il continue en déplacement
+      if (e.touches.length === 1 && P.zoom > 1) { const t = e.touches[0]; st = { x: t.clientX, y: t.clientY, t: Date.now(), mode: "pan", zx: P.zx, zy: P.zy }; }
+      else st = null;
       return;
     }
     const t = e.changedTouches[0], dx = t.clientX - st.x, dy = t.clientY - st.y, dt = Date.now() - st.t, mode = st.mode; st = null;
@@ -2954,6 +2970,10 @@ async function init() {
   buildThemeSheet(); applyTheme(); setupSections(); renderRatios(); bind(); bindGallery(); bindAutocomplete(); bindSettings(); guardRanges(); bindImport(); bindNow(); bindTabs(); bindHighlight(); bindDock(); bindCivitai(); bindWide(); bindPhoto(); bindTipo();
   $$("#segLang button").forEach(b => { b.classList.toggle("on", b.dataset.v === LANG_PREF); b.onclick = () => { try { localStorage.setItem(LANGKEY, b.dataset.v); } catch (e) {} location.reload(); }; });
   startI18n();
+  // mobile : le dock (Générer / file) se range pendant la saisie pour laisser la place au clavier et à l'autocomplétion
+  const isField = el => el && (el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && !/^(checkbox|radio|range|button|submit|file|color)$/.test(el.type)));
+  document.addEventListener("focusin", e => { if (isField(e.target)) document.body.classList.add("typing"); });
+  document.addEventListener("focusout", () => setTimeout(() => { if (!isField(document.activeElement)) document.body.classList.remove("typing"); }, 120));
   let hlOn = true; try { hlOn = localStorage.getItem(HLKEY) !== "0"; } catch (e) {}
   setHl(hlOn); $("#hlToggle").onclick = () => setHl(document.body.classList.contains("nohl"));
   $("#prompt").addEventListener("input", () => { clearTimeout(window._pcT); window._pcT = setTimeout(renderCheck, 450); });
