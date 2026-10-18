@@ -465,6 +465,23 @@ section.cfg{padding:6px 6px 14px}
 .pane{display:none;padding:0 10px}
 .pane.on{display:block;animation:fade .18s}
 .panehead{display:none}
+/* réglages compacts */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 14px;align-items:end}
+.cfg label.lbl{margin:8px 2px 4px}
+.cfg select,.cfg input[type=number],.cfg input[type=text],.cfg input[type=search]{padding-top:10px;padding-bottom:10px;border-radius:12px}
+.cfg .btn.cbtn{flex:none;height:44px;padding:0 14px;border-radius:12px}
+.cfg .stepper{width:max-content}
+.cfg .stepper button{width:36px;height:36px}
+.fmtbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.fmtbar .chips{margin:0;gap:6px}
+.fmtbar .chip{padding:7px 11px}
+.seg.mini{flex:none}
+.seg.mini button{padding:7px 12px;font-size:13px}
+.cfg .row.dims{max-width:440px}
+.hrow{align-items:center;margin-top:2px}
+.switchrow.small{margin-top:10px;font-weight:500;font-size:13.5px;color:var(--muted);gap:10px}
+.cfg .checks{margin-top:8px}
+.prow{margin-top:8px}
 .tabs .cfgall{flex:0 0 auto;justify-content:center;padding:8px 10px;order:-1}
 @media (min-width:1100px){ .tabs button{flex:1 1 0;padding:8px 6px} .tabs button small{max-width:100%} .tabs .cfgall{flex:0 0 auto} }
 .cfg.all .pane{display:block;scroll-margin-top:16px}
@@ -603,7 +620,7 @@ section.cfg{padding:6px 6px 14px}
     </div>
 
     <div class="pane" data-pane="loras">
-      <div class="row" style="align-items:center"><div><input id="loraSearch" type="search" placeholder="Ajouter un LoRA…" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button class="btn" id="civOpen" style="flex:none;height:48px" title="Chercher sur Civitai">Civitai</button><button class="btn" id="loraImport" style="flex:none;height:48px" title="Importer un LoRA (.safetensors)">＋</button></div>
+      <div class="row" style="align-items:center"><div><input id="loraSearch" type="search" placeholder="Ajouter un LoRA…" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button class="btn cbtn" id="civOpen" title="Chercher sur Civitai">Civitai</button><button class="btn cbtn" id="loraImport" title="Importer un LoRA (.safetensors)">＋</button></div>
       <input type="file" id="loraFile" accept=".safetensors,.pt,.ckpt" multiple style="display:none">
       <div class="results" id="loraResults"></div>
       <div id="loraList"></div>
@@ -612,57 +629,49 @@ section.cfg{padding:6px 6px 14px}
     </div>
 
     <div class="pane" data-pane="format">
-      <div class="group-title">Léger · rapide</div>
-      <div class="chips" id="ratiosLight"></div>
-      <div class="group-title">Natif SDXL</div>
-      <div class="chips" id="ratiosNative"></div>
-      <div class="row">
+      <div class="fmtbar">
+        <div class="seg mini" id="segSize"><button data-sz="light" title="≈ 0,75 MP · plus rapide">Rapide</button><button data-sz="native" title="≈ 1 MP · résolution native SDXL">SDXL</button></div>
+        <div class="chips" id="ratios"></div>
+      </div>
+      <div class="row dims">
         <div><label class="lbl" for="width">Largeur</label><input id="width" data-key="width" type="number" inputmode="numeric" step="8" min="256" max="4096"></div>
-        <button class="btn" id="swap" aria-label="Inverser" style="flex:none;height:48px">⇄</button>
+        <button class="btn cbtn" id="swap" aria-label="Inverser" title="Inverser">⇄</button>
         <div><label class="lbl" for="height">Hauteur</label><input id="height" data-key="height" type="number" inputmode="numeric" step="8" min="256" max="4096"></div>
       </div>
     </div>
 
     <div class="pane" data-pane="gen">
-      <div class="row" style="align-items:center;justify-content:space-between">
-        <div style="flex:none"><div style="font-weight:600">Nombre d'images</div><div class="muted">générées à la suite</div></div>
-        <div class="stepper" style="flex:none"><button id="bMinus" aria-label="Moins">−</button><output id="bVal">1</output><button id="bPlus" aria-label="Plus">+</button></div>
-      </div>
-      <div class="row">
+      <div class="cgrid">
+        <div><label class="lbl" title="générées à la suite">Images</label><div class="stepper"><button id="bMinus" aria-label="Moins">−</button><output id="bVal">1</output><button id="bPlus" aria-label="Plus">+</button></div></div>
         <div><label class="lbl" for="sampler">Sampler</label><select id="sampler" data-key="sampler"></select></div>
         <div><label class="lbl" for="scheduler">Scheduler</label><select id="scheduler" data-key="scheduler"></select></div>
       </div>
-      <div class="grid2">
+      <div class="cgrid">
         <div><label class="lbl">Steps <b data-show="steps"></b></label><input type="range" data-key="steps" min="1" max="60" step="1"></div>
         <div><label class="lbl">CFG <b data-show="cfg"></b></label><input type="range" data-key="cfg" min="1" max="12" step="0.5"></div>
-      </div>
-      <div class="row">
-        <div><label class="lbl" for="seed">Seed</label><input id="seed" data-key="seed" type="number" inputmode="numeric" placeholder="-1"></div>
-        <button class="btn" id="seedRandom" style="flex:none;height:48px">🎲 Aléatoire</button>
+        <div><label class="lbl" for="seed">Seed</label><div class="row"><div><input id="seed" data-key="seed" type="number" inputmode="numeric" placeholder="-1"></div><button class="btn cbtn" id="seedRandom" title="Aléatoire" aria-label="Aléatoire">🎲</button></div></div>
       </div>
     </div>
 
     <div class="pane" data-pane="hires">
-      <div class="switchrow"><label class="toggle"><input type="checkbox" data-key="hires.enabled" id="hiresOn"><span></span></label><span>Activer le hires fix</span></div>
-      <label class="lbl" for="upscaler">Upscaler</label>
-      <select id="upscaler" data-key="hires.upscaler"></select>
-      <div class="grid2">
+      <div class="row hrow">
+        <div class="switchrow" style="flex:none"><label class="toggle"><input type="checkbox" data-key="hires.enabled" id="hiresOn"><span></span></label><span>Activer</span></div>
+        <div><select id="upscaler" data-key="hires.upscaler" aria-label="Upscaler" title="Upscaler"></select></div>
+      </div>
+      <div class="cgrid">
         <div><label class="lbl">Upscale <b data-show="hires.scale" data-suffix="×"></b></label><input type="range" data-key="hires.scale" min="1" max="2.5" step="0.05"></div>
         <div><label class="lbl">Denoising <b data-show="hires.denoise"></b></label><input type="range" data-key="hires.denoise" min="0" max="1" step="0.01"></div>
+        <div><label class="lbl">Hires steps <b data-show="hires.steps" data-zero="= base"></b></label><input type="range" data-key="hires.steps" min="0" max="40" step="1"></div>
       </div>
-      <label class="lbl">Hires steps <b data-show="hires.steps" data-zero="= base"></b></label>
-      <input type="range" data-key="hires.steps" min="0" max="40" step="1">
-      <div class="switchrow" style="margin-top:14px"><label class="toggle"><input type="checkbox" data-key="hires.tiled"><span></span></label><span style="font-weight:500;font-size:14px">Décodage VAE en tuiles<br><small class="muted">évite que Forge gèle sur le VAE en grande taille (8 Go)</small></span></div>
+      <div class="switchrow small" title="évite que Forge gèle sur le VAE en grande taille (8 Go)"><label class="toggle"><input type="checkbox" data-key="hires.tiled"><span></span></label><span>Décodage VAE en tuiles</span></div>
     </div>
 
     <div class="pane" data-pane="model">
-      <label class="lbl" for="model" style="margin-top:2px">Checkpoint</label>
-      <select id="model"></select>
-      <div class="group-title" style="margin-top:16px">Presets <span id="presetHint" style="text-transform:none;letter-spacing:0"></span></div>
+      <select id="model" aria-label="Checkpoint" title="Checkpoint"></select>
+      <div class="group-title" style="margin-top:14px">Presets <span id="presetHint" style="text-transform:none;letter-spacing:0"></span></div>
       <div class="chips" id="presetList"></div>
-      <div class="row"><div><input type="text" id="presetName" placeholder="Nom du preset…" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button class="btn" id="presetSave" style="flex:none;height:48px">Enregistrer</button></div>
-      <div class="checks"><span>Inclure :</span><label><input type="checkbox" id="pkPrompt">prompt</label><label><input type="checkbox" id="pkNeg">négatif</label><label><input type="checkbox" id="pkLoras">LoRAs</label></div>
-      <div class="muted" style="margin-top:8px">Toujours enregistrés : format, hires, sampler, steps, CFG, nombre d'images (jamais la seed). Même nom = mise à jour.</div>
+      <div class="row prow"><div><input type="text" id="presetName" placeholder="Nom du preset…" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button class="btn cbtn" id="presetSave">Enregistrer</button></div>
+      <div class="checks" title="Toujours enregistrés : format, hires, sampler, steps, CFG, nombre d'images (jamais la seed). Même nom = mise à jour."><span>Inclure :</span><label><input type="checkbox" id="pkPrompt">prompt</label><label><input type="checkbox" id="pkNeg">négatif</label><label><input type="checkbox" id="pkLoras">LoRAs</label><span class="muted" style="margin-left:auto">ⓘ</span></div>
     </div>
   </section>
 
@@ -886,7 +895,7 @@ const EN = {
   "✓ Prompt propre": "✓ Clean prompt", "Corriger": "Fix", "Ranger les virgules": "Tidy commas", "Prompt nettoyé": "Prompt cleaned",
   "parenthèses mal fermées": "unbalanced parentheses",
   // LoRAs
-  "LoRAs": "LoRAs", "Tout afficher": "Show all", "Revenir aux onglets": "Back to tabs", "désactivé · réactiver": "disabled · re-enable", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
+  "LoRAs": "LoRAs", "Rapide": "Fast", "Activer": "Enable", "à la suite": "in a row", "Aléatoire": "Random", "Inverser": "Swap", "≈ 0,75 MP · plus rapide": "≈ 0.75 MP · faster", "≈ 1 MP · résolution native SDXL": "≈ 1 MP · SDXL native resolution", "Tout afficher": "Show all", "Revenir aux onglets": "Back to tabs", "désactivé · réactiver": "disabled · re-enable", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
   "Réactiver": "Re-enable", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
   "Importer un LoRA (.safetensors)": "Import a LoRA (.safetensors)", "Chercher sur Civitai": "Search on Civitai", "Ajouter au prompt": "Add to prompt",
   "Déposer le LoRA ici": "Drop the LoRA here", ".safetensors · il sera copié dans models/Lora": ".safetensors · it will be copied to models/Lora",
@@ -1072,7 +1081,7 @@ function startI18n() {
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-const RATIOS_LIGHT = [["4:3", 1024, 768], ["3:4", 768, 1024], ["1:1", 896, 896], ["16:9", 1024, 576], ["9:16", 576, 1024]];
+const RATIOS_LIGHT = [["4:3", 1024, 768], ["3:4", 768, 1024], ["1:1", 896, 896], ["2:3", 704, 1056], ["3:2", 1056, 704], ["16:9", 1024, 576], ["9:16", 576, 1024]];
 const RATIOS_NATIVE = [["1:1", 1024, 1024], ["2:3", 832, 1216], ["3:2", 1216, 832], ["3:4", 864, 1152], ["4:3", 1152, 864], ["9:16", 768, 1344], ["16:9", 1344, 768]];
 const ACCENTS = [
   ["#ff6b5b", "#ffb36b"], ["#ff4f8b", "#ff9ec4"], ["#a66bff", "#6ba8ff"], ["#4f8bff", "#6be3ff"],
@@ -1561,7 +1570,7 @@ function updateDerived() {
   $$('input[type=range][data-key]').forEach(paintRange);
   const w = +S.width, h = +S.height;
   $("#sizeHint").textContent = `${w}×${h} · ${(w * h / 1e6).toFixed(2)} MP`;
-  $$(".chips .chip").forEach(c => c.classList.toggle("on", +c.dataset.w === w && +c.dataset.h === h));
+  if ($("#ratios")) renderRatios();
   const hr = S.hires || {};
   $("#hiresHint").textContent = hr.enabled ? `→ ${r8(w * hr.scale)}×${r8(h * hr.scale)}` : "désactivé";
   const n = Math.max(1, +S.batch_count || 1);
@@ -1637,16 +1646,37 @@ function renderActLoras() {
     box.appendChild(c);
   }
 }
+const RATIO_ORDER = ["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9"];
+const SZKEY = "forgeMobileSize";
+function sizeClass() {
+  const w = +(S && S.width), h = +(S && S.height);
+  if (RATIOS_LIGHT.some(r => r[1] === w && r[2] === h)) return "light";
+  if (RATIOS_NATIVE.some(r => r[1] === w && r[2] === h)) return "native";
+  try { return localStorage.getItem(SZKEY) || "native"; } catch (e) { return "native"; }
+}
 function renderRatios() {
-  for (const [id, list] of [["#ratiosLight", RATIOS_LIGHT], ["#ratiosNative", RATIOS_NATIVE]]) {
-    const box = $(id);
-    for (const [label, w, h] of list) {
-      const c = document.createElement("button"); c.className = "chip"; c.dataset.w = w; c.dataset.h = h;
-      c.innerHTML = `${label} <small>${w}×${h}</small>`;
-      c.onclick = () => { S.width = w; S.height = h; render(); changed(); };
-      box.appendChild(c);
-    }
+  const sz = sizeClass(), list = sz === "light" ? RATIOS_LIGHT : RATIOS_NATIVE, box = $("#ratios");
+  $$("#segSize button").forEach(b => b.classList.toggle("on", b.dataset.sz === sz));
+  box.textContent = "";
+  for (const label of RATIO_ORDER) {
+    const r = list.find(x => x[0] === label); if (!r) continue;
+    const [, w, h] = r, c = document.createElement("button"); c.className = "chip"; c.dataset.w = w; c.dataset.h = h;
+    c.title = `${w}×${h}`; c.textContent = label;
+    c.classList.toggle("on", !!S && +S.width === w && +S.height === h);
+    c.onclick = () => { S.width = w; S.height = h; render(); changed(); };
+    box.appendChild(c);
   }
+}
+function bindSize() {
+  $$("#segSize button").forEach(b => b.onclick = () => {
+    const from = sizeClass(), to = b.dataset.sz; try { localStorage.setItem(SZKEY, to); } catch (e) {}
+    if (from !== to) {  // même ratio dans l'autre taille
+      const cur = (from === "light" ? RATIOS_LIGHT : RATIOS_NATIVE).find(r => r[1] === +S.width && r[2] === +S.height);
+      const nxt = cur && (to === "light" ? RATIOS_LIGHT : RATIOS_NATIVE).find(r => r[0] === cur[0]);
+      if (nxt) { S.width = nxt[1]; S.height = nxt[2]; render(); changed(); }
+    }
+    renderRatios();
+  });
 }
 
 /* ===================== état partagé ===================== */
@@ -2969,6 +2999,7 @@ function bind() {
     const ev = el.tagName === "SELECT" || el.type === "checkbox" ? "change" : "input";
     el.addEventListener(ev, () => { setPath(S, el.dataset.key, readInput(el)); if (el.type === "range") paintRange(el); changed(); });
   }
+  bindSize();
   $("#swap").onclick = () => { [S.width, S.height] = [S.height, S.width]; render(); changed(); };
   $("#seedRandom").onclick = () => { S.seed = -1; render(); changed(); };
   $("#bMinus").onclick = () => { S.batch_count = Math.max(1, (+S.batch_count || 1) - 1); changed(); };
