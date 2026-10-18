@@ -464,6 +464,14 @@ section.cfg{padding:6px 6px 14px}
 .tabs button.on small{color:var(--muted)}
 .pane{display:none;padding:0 10px}
 .pane.on{display:block;animation:fade .18s}
+.panehead{display:none}
+.tabs .cfgall{flex:0 0 auto;justify-content:center;padding:8px 10px;order:-1}
+@media (min-width:1100px){ .tabs button{flex:1 1 0;padding:8px 6px} .tabs button small{max-width:100%} .tabs .cfgall{flex:0 0 auto} }
+.cfg.all .pane{display:block;scroll-margin-top:16px}
+.cfg.all .pane + .pane{margin-top:18px;padding-top:16px;border-top:1px solid var(--field-stroke)}
+.cfg.all .panehead{display:block;font-weight:700;font-size:15px;margin:0 0 10px}
+.cfg.all .tabs button.on:not(.cfgall){background:transparent;box-shadow:none;color:var(--muted)}
+.cfg.all .tabs{position:sticky;top:0;z-index:3;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 #loraOff .chip{padding:6px 10px;font-size:12.5px;opacity:.75}
 #loraOff .chip small{margin-left:2px}
@@ -591,6 +599,7 @@ section.cfg{padding:6px 6px 14px}
       <button data-tab="gen"><span>Génération</span><small id="genHint"></small></button>
       <button data-tab="hires"><span>Hires fix</span><small id="hiresHint"></small></button>
       <button data-tab="model"><span>Modèle</span><small id="modelHint"></small></button>
+      <button id="cfgAll" class="cfgall" aria-label="Tout afficher" title="Tout afficher"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     </div>
 
     <div class="pane" data-pane="loras">
@@ -877,7 +886,7 @@ const EN = {
   "✓ Prompt propre": "✓ Clean prompt", "Corriger": "Fix", "Ranger les virgules": "Tidy commas", "Prompt nettoyé": "Prompt cleaned",
   "parenthèses mal fermées": "unbalanced parentheses",
   // LoRAs
-  "LoRAs": "LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
+  "LoRAs": "LoRAs", "Tout afficher": "Show all", "Revenir aux onglets": "Back to tabs", "désactivé · réactiver": "disabled · re-enable", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
   "Réactiver": "Re-enable", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
   "Importer un LoRA (.safetensors)": "Import a LoRA (.safetensors)", "Chercher sur Civitai": "Search on Civitai", "Ajouter au prompt": "Add to prompt",
   "Déposer le LoRA ici": "Drop the LoRA here", ".safetensors · il sera copié dans models/Lora": ".safetensors · it will be copied to models/Lora",
@@ -1195,15 +1204,35 @@ function guardRanges() {
 
 /* ===================== onglets ===================== */
 const TABKEY = "forgeMobileTab";
+const ALLKEY = "forgeMobileCfgAll";
+function cfgAll() { return $(".cfg").classList.contains("all"); }
 function showTab(t) {
-  $$("#cfgTabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  if (cfgAll()) {  // mode « tout afficher » : l'onglet sert de raccourci vers la section
+    const p = $(`.pane[data-pane="${t}"]`); if (p) p.scrollIntoView({ block: "start", behavior: "smooth" });
+    return;
+  }
+  $$("#cfgTabs button[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
   $$(".pane").forEach(p => p.classList.toggle("on", p.dataset.pane === t));
   try { localStorage.setItem(TABKEY, t); } catch (e) {}
 }
+function setCfgAll(on, save = true) {
+  $(".cfg").classList.toggle("all", on);
+  $("#cfgAll").classList.toggle("on", on);
+  $("#cfgAll").title = on ? "Revenir aux onglets" : "Tout afficher";
+  if (save) try { localStorage.setItem(ALLKEY, on ? "1" : "0"); } catch (e) {}
+  if (!on) { let t = "loras"; try { t = localStorage.getItem(TABKEY) || t; } catch (e) {} showTab($(`.pane[data-pane="${t}"]`) ? t : "loras"); }
+}
 function bindTabs() {
-  $$("#cfgTabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
-  let t = "loras"; try { t = localStorage.getItem(TABKEY) || t; } catch (e) {}
-  showTab($(`.pane[data-pane="${t}"]`) ? t : "loras");
+  // titre de section pour le mode « tout afficher » (repris du libellé de l'onglet)
+  $$("#cfgTabs button[data-tab]").forEach(b => {
+    b.onclick = () => showTab(b.dataset.tab);
+    const pane = $(`.pane[data-pane="${b.dataset.tab}"]`), h = document.createElement("div");
+    h.className = "panehead"; h.textContent = b.querySelector("span").textContent; pane.prepend(h);
+  });
+  $("#cfgAll").onclick = () => setCfgAll(!cfgAll());
+  let all = null; try { all = localStorage.getItem(ALLKEY); } catch (e) {}
+  setCfgAll(all == null ? innerWidth >= 1100 : all === "1", false);
+  if (!cfgAll()) { let t = "loras"; try { t = localStorage.getItem(TABKEY) || t; } catch (e) {} showTab($(`.pane[data-pane="${t}"]`) ? t : "loras"); }
 }
 
 /* ===================== coloration du prompt ===================== */
@@ -1682,16 +1711,24 @@ function showLoraResults() {
   const q = $("#loraSearch").value.trim().toLowerCase();
   const box = $("#loraResults");
   if (document.activeElement !== $("#loraSearch") && !q) { box.style.display = "none"; return; }
-  const used = new Set((S.loras || []).map(l => l.name));
-  const list = loraCatalog.filter(l => !used.has(l.name) && (!q || (l.name + " " + l.folder).toLowerCase().includes(q))).slice(0, 40);
+  const active = new Set((S.loras || []).filter(l => l.enabled).map(l => l.name));
+  const off = new Set((S.loras || []).filter(l => !l.enabled).map(l => l.name));
+  const match = l => !q || (l.name + " " + (l.folder || "")).toLowerCase().includes(q);
+  // les LoRAs désactivés remontent en premier : ce sont ceux qu'on cherche le plus souvent
+  const list = [...(S.loras || []).filter(l => !l.enabled && match(l) && !loraCatalog.some(c => c.name === l.name)).map(l => ({ name: l.name, folder: "" })),
+                ...loraCatalog.filter(l => !active.has(l.name) && match(l))]
+    .sort((a, b) => off.has(b.name) - off.has(a.name)).slice(0, 40);
   box.textContent = "";
   if (!list.length) { box.style.display = "none"; return; }
   for (const l of list) {
     const d = document.createElement("div"); d.textContent = l.name;
-    if (l.folder) { const s = document.createElement("small"); s.textContent = l.folder; d.appendChild(s); }
+    const isOff = off.has(l.name);
+    if (l.folder || isOff) { const s = document.createElement("small"); s.textContent = isOff ? "désactivé · réactiver" : l.folder; d.appendChild(s); }
     d.onmousedown = e => e.preventDefault();
     d.onclick = () => {
-      S.loras = S.loras || []; S.loras.push({ name: l.name, weight: 0.7, enabled: true });
+      S.loras = S.loras || [];
+      const ex = S.loras.find(x => x.name === l.name);
+      if (ex) ex.enabled = true; else S.loras.push({ name: l.name, weight: 0.7, enabled: true });
       $("#loraSearch").value = ""; $("#loraSearch").blur(); box.style.display = "none"; renderLoras(); changed();
     };
     box.appendChild(d);
