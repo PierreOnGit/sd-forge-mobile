@@ -214,6 +214,14 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .gwrap{position:relative}
 .gscroll{max-height:64vh;overflow-y:auto;overscroll-behavior:contain;border-radius:14px;scrollbar-width:thin;padding-right:2px}
 @media (min-width:1100px){.gscroll{max-height:calc(100vh - 330px);min-height:420px}body.gwide .gscroll{max-height:calc(100vh - 250px)}}
+/* mobile : la galerie ne pilote plus son propre scroll (sinon elle piège le doigt), c'est la page qui défile */
+@media (max-width:1099px){
+  .gscroll{max-height:none;overflow:visible;overscroll-behavior:auto;padding-right:0}
+  .gallery{touch-action:pan-y}
+  .tile{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+  .tile img{pointer-events:none;-webkit-user-drag:none}
+}
+@media (hover:none){.tile:active{transform:none}}
 .gnav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid var(--stroke);
   background:rgba(10,10,16,.55);color:#fff;font-size:26px;line-height:1;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   display:grid;place-items:center;opacity:.85;transition:opacity .2s,transform .2s}
@@ -227,6 +235,8 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .ptrack{position:absolute;top:0;left:0;height:100%;display:flex;will-change:transform}
 .pslide{width:100vw;height:100%;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pslide img{max-width:100%;max-height:100%;object-fit:contain;transform-origin:0 0;will-change:transform;-webkit-user-drag:none}
+/* .pslide est un conteneur de scroll (overflow:hidden) : le touch-action de .photo ne s'y applique plus, il faut le reposer ici sinon le navigateur vole le pincement */
+.ptrack,.pslide,.pslide img{touch-action:none;-webkit-touch-callout:none}
 .pbar{position:absolute;left:0;right:0;display:flex;align-items:center;gap:8px;padding:10px 12px;transition:opacity .25s,transform .25s;z-index:2}
 .ptop{top:0;padding-top:calc(10px + env(safe-area-inset-top));background:linear-gradient(rgba(0,0,0,.6),transparent)}
 .pbot{bottom:0;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.65));justify-content:center}
@@ -290,6 +300,21 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .round.stop{color:var(--err)}
 .round.add{font-size:24px;font-weight:300;color:var(--text)}
 .go.resume{background:linear-gradient(135deg,#2fd0a0,#6be3c4);box-shadow:0 8px 24px rgba(47,208,160,.4),inset 0 1px 0 rgba(255,255,255,.35)}
+
+/* fenêtre de saisie ancrée en bas (mobile) */
+:root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px)}
+.pbar,.pspacer,#pScrim{display:none}
+@media (max-width:1099px){
+  body.psheet #pScrim{display:block;position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.38)}
+  body.psheet .dock{display:none}
+  body.psheet .pspacer{display:block}
+  body.psheet section[data-sec=prompt]{position:fixed;left:8px;right:8px;bottom:calc(var(--kb) + 8px);z-index:30;max-width:640px;margin:0 auto;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+  body.psheet section[data-sec=prompt]>.head{display:none}
+  body.psheet section[data-sec=prompt]>.body{display:block !important;max-height:calc(var(--vvh) - 24px);overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 0}
+  body.psheet textarea#prompt{min-height:120px;max-height:36vh}
+  body.psheet .pbar{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;z-index:2;padding:10px 0 calc(12px + var(--sab));margin-top:8px;background:linear-gradient(to bottom,transparent,var(--pop) 28%)}
+  .pbar .go{padding:14px}
+}
 
 /* feuilles (visionneuse, thème) */
 .sheet{position:fixed;inset:0;z-index:20;display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:auto;padding:calc(14px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom))}
@@ -596,6 +621,7 @@ section.cfg{padding:6px 6px 14px}
         <div class="acwrap hl neg"><pre class="hlb" id="negativeHl" aria-hidden="true"></pre><textarea id="negative" data-key="negative" data-ac placeholder="lowres, worst quality, …" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea></div>
       </details>
       <div class="ac" id="ac"></div>
+      <div class="pbar"><button class="go" id="pGo">Générer</button><button class="round show" id="pShut" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
     </div>
   </section>
 
@@ -860,6 +886,7 @@ section.cfg{padding:6px 6px 14px}
 </div>
 
 <div class="dockslot" id="dockSlot"></div>
+<div id="pScrim"></div>
 
 <div class="drop" id="drop"><div>Déposer le LoRA ici<small>.safetensors · il sera copié dans models/Lora</small></div></div>
 
@@ -1297,6 +1324,7 @@ function bindHighlight() {
 const WKEY = "forgeMobileWide";
 function setWide(on) {
   document.body.classList.toggle("gwide", on);
+  if (on && window._closePromptSheet) window._closePromptSheet();
   renderMTabs();
   window._jumpSync && window._jumpSync();
   try { localStorage.setItem(WKEY, on ? "1" : "0"); } catch (e) {}
@@ -1591,6 +1619,7 @@ function goLabel() {
   const go = $("#go");
   go.classList.toggle("resume", paused);
   go.textContent = paused ? `▶ Reprendre la file · ${Q.pending.length}` : busy ? (n > 1 ? `Ajouter ${n} images à la file` : "Ajouter à la file") : (n > 1 ? `Générer ${n} images` : "Générer");
+  const pg = $("#pGo"); if (pg) { pg.textContent = go.textContent; pg.classList.toggle("resume", paused); }
   $("#qAddBtn").classList.toggle("show", paused);
   $("#qPauseBtn").classList.toggle("show", !!(Q && !Q.paused && Q.running && Q.pending.length));
 }
@@ -2300,6 +2329,7 @@ function bindPhoto() {
       ph.style.background = `rgba(0,0,0,${1 - Math.min(dy, 300) / 400})`;
     }
   }, { passive: false });
+  ph.addEventListener("touchcancel", () => { if (st && st.mode === "pinch") { if (P.zoom < 1.05) { P.zoom = 1; P.zx = 0; P.zy = 0; } else clampZoom(); applyZoom(true); } st = null; photoSetTrack(0, true); ph.style.background = ""; }, { passive: true });
   ph.addEventListener("touchend", e => {
     if (!st) return;
     if (st.mode === "pinch") {
@@ -2410,7 +2440,7 @@ function bindGallery() {
   $("#gScroll").addEventListener("touchstart", e => { gx = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
   $("#gScroll").addEventListener("touchend", e => {
     if (!gx || selecting) return; const t = e.changedTouches[0], dx = t.clientX - gx.x, dy = t.clientY - gx.y; gx = null;
-    if (Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 2) $(dx < 0 ? "#gNextPage" : "#gPrevPage").click();
+    if (Math.abs(dx) > 130 && Math.abs(dx) > Math.abs(dy) * 3) $(dx < 0 ? "#gNextPage" : "#gPrevPage").click();
   }, { passive: true });
   $("#gDay").onchange = () => { G.day = $("#gDay").value; $("#gDay").blur(); gChanged(); };
   $("#gFilt").onclick = () => { const on = !$("#gPanel").classList.contains("show"); $("#gPanel").classList.toggle("show", on); $("#gFilt").classList.toggle("on", on); };
@@ -3042,6 +3072,33 @@ async function init() {
   const isField = el => el && (el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && !/^(checkbox|radio|range|button|submit|file|color)$/.test(el.type)));
   document.addEventListener("focusin", e => { if (isField(e.target)) document.body.classList.add("typing"); });
   document.addEventListener("focusout", () => setTimeout(() => { if (!isField(document.activeElement)) document.body.classList.remove("typing"); }, 120));
+  // mobile : fenêtre de saisie ancrée en bas (au-dessus du clavier) avec Générer intégré
+  {
+    const sec = $("section[data-sec=prompt]"), root = document.documentElement.style, vv = window.visualViewport;
+    const mob = () => matchMedia("(max-width:1099px)").matches && !document.body.classList.contains("gwide");
+    const syncKb = () => {
+      const h = vv ? vv.height : innerHeight, kb = vv ? Math.max(0, innerHeight - vv.height - vv.offsetTop) : 0;
+      root.setProperty("--kb", kb + "px"); root.setProperty("--vvh", h + "px");
+      root.setProperty("--sab", kb > 80 ? "0px" : "env(safe-area-inset-bottom,0px)");
+    };
+    if (vv) { vv.addEventListener("resize", syncKb); vv.addEventListener("scroll", syncKb); }
+    const open = () => {
+      if (!mob() || document.body.classList.contains("psheet")) return;
+      const sp = document.createElement("div"); sp.className = "pspacer"; sp.id = "pSpacer";
+      sp.style.height = sec.offsetHeight + (parseFloat(getComputedStyle(sec).marginBottom) || 0) + "px";
+      sec.before(sp); document.body.classList.add("psheet"); syncKb();
+    };
+    const close = () => {
+      document.body.classList.remove("psheet"); $("#pSpacer")?.remove();
+      if (isField(document.activeElement)) document.activeElement.blur();
+    };
+    window._closePromptSheet = close;
+    document.addEventListener("focusin", e => { if (e.target.id === "prompt" || e.target.id === "negative") open(); });
+    $("#pShut").onclick = close; $("#pScrim").onclick = close;
+    $("#pGo").onclick = () => { $("#go").click(); close(); };
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("psheet")) close(); });
+    syncKb();
+  }
   let hlOn = true; try { hlOn = localStorage.getItem(HLKEY) !== "0"; } catch (e) {}
   setHl(hlOn); $("#hlToggle").onclick = () => setHl(document.body.classList.contains("nohl"));
   $("#prompt").addEventListener("input", () => { clearTimeout(window._pcT); window._pcT = setTimeout(renderCheck, 450); });
