@@ -301,7 +301,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 
 /* mobile : galerie en haut, compositeur (prompt + Générer) en bas, réglages derrière le bouton Studio */
 :root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px);--ch:150px}
-.pbar,.cfgbar,#cfgOpen{display:none}
+.cbar,.cfgbar,#cfgOpen{display:none}
 @media (max-width:1099px){
   .mtabs,.rail,#gJump{display:none !important}
   #cfgOpen{display:grid}
@@ -326,10 +326,16 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   body.psheet #composer section[data-sec=prompt]>.body{max-height:min(62vh,calc(var(--vvh) - 110px))}
   body.psheet #composer textarea#prompt{min-height:120px;max-height:34vh}
   body.psheet #composer .dock{display:none}
-  body.psheet #composer .pbar{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;z-index:2;padding:10px 0 2px;margin-top:8px;background:linear-gradient(to bottom,transparent,var(--pop) 28%)}
-  .pbar .go{padding:14px}
+  body.psheet #composer .cbar{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;z-index:2;padding:10px 0 2px;margin-top:8px;background:linear-gradient(to bottom,transparent,var(--pop) 28%)}
+  .cbar .go{padding:14px}
 }
 #viewerImg{cursor:zoom-in}
+.sheet.varsheet{z-index:60;padding:0}
+.sheet.varsheet.show{display:flex;align-items:flex-end;justify-content:center}
+.sheet.varsheet .panel{width:100%;max-width:520px;margin:0;border-radius:24px 24px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+.varsheet h3{margin:0 0 2px;font-size:17px}
+.varsheet .row{display:flex;gap:8px;margin-top:16px}
+.varsheet .row .go{flex:1;padding:14px}
 
 /* feuilles (visionneuse, thème) */
 .sheet{position:fixed;inset:0;z-index:20;display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:auto;padding:calc(14px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom))}
@@ -638,7 +644,7 @@ section.cfg{padding:6px 6px 14px}
         <div class="acwrap hl neg"><pre class="hlb" id="negativeHl" aria-hidden="true"></pre><textarea id="negative" data-key="negative" data-ac placeholder="lowres, worst quality, …" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea></div>
       </details>
       <div class="ac" id="ac"></div>
-      <div class="pbar"><button class="go" id="pGo">Générer</button><button class="round show" id="pShut" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+      <div class="cbar"><button class="go" id="pGo">Générer</button><button class="round show" id="pShut" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
     </div>
   </section>
 
@@ -810,6 +816,7 @@ section.cfg{padding:6px 6px 14px}
   </div>
   <div class="pbar pbot">
     <button class="pbtn wide" id="pInfoBtn">Infos</button>
+    <button class="pbtn wide" id="pVar">✦ Variation</button>
     <button class="pbtn wide" id="pReuse">Reprendre le prompt</button>
   </div>
   <div class="pinfo" id="pInfo"><div class="pgrab"></div><div id="pInfoBody" class="viewer"></div></div>
@@ -828,6 +835,7 @@ section.cfg{padding:6px 6px 14px}
       <div class="acts">
         <button class="btn" id="reuse">Reprendre le prompt</button>
         <button class="btn" id="reuseAll">Prompt + réglages + seed</button>
+        <button class="btn" id="vVar">✦ Variation</button>
         <a class="btn" id="viewerOpen" target="_blank" rel="noopener">Ouvrir l'original</a>
         <a class="btn" id="vJpg" download title="Télécharger une copie JPG compressée (sans métadonnées)">JPG compressé</a>
         <button class="btn danger" id="vTrash">Corbeille</button>
@@ -903,6 +911,15 @@ section.cfg{padding:6px 6px 14px}
 </div>
 
 <div class="dockslot" id="dockSlot"></div>
+<div class="sheet varsheet" id="varSheet"><div class="panel glass">
+  <h3>Variation</h3>
+  <div class="muted">Repart de cette image (img2img) avec le même prompt, une nouvelle seed.</div>
+  <label class="lbl"><span>Force du changement</span></label>
+  <div class="seg" id="varStr"><button data-v="0.3">Subtile</button><button data-v="0.5">Moyenne</button><button data-v="0.7">Forte</button></div>
+  <label class="lbl"><span>Nombre d'images</span></label>
+  <div class="seg" id="varN"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button></div>
+  <div class="row"><button class="btn" id="varCancel">Annuler</button><button class="go" id="varGo">Lancer la variation</button></div>
+</div></div>
 
 <div class="drop" id="drop"><div>Déposer le LoRA ici<small>.safetensors · il sera copié dans models/Lora</small></div></div>
 
@@ -989,7 +1006,7 @@ const EN = {
   "Image introuvable": "Image not found",
   // visionneuse
   "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
-  "Reprendre le prompt": "Reuse prompt", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
   "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
   "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
   "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
@@ -1847,6 +1864,33 @@ async function generate() {
   const go = $("#go"); go.disabled = true; setTimeout(() => (go.disabled = false), 700);
   try { await enqueue([{ payload: payloadFor(S, n), label: jobLabel(S) }]); toast(busy ? "Ajouté à la file" : "Génération lancée"); }
   catch (e) { toast("Erreur : " + e.message, true); if (e.status === 404) noApi(); }
+}
+function bindVariation() {
+  const KEY = "forgeMobileVar", cfg = { d: 0.5, n: 1 };
+  try { Object.assign(cfg, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  const sheet = $("#varSheet");
+  const sync = () => { $$("#varStr button").forEach(b => b.classList.toggle("on", +b.dataset.v === cfg.d)); $$("#varN button").forEach(b => b.classList.toggle("on", +b.dataset.v === cfg.n)); };
+  const open = () => { if (!vItem()) return; sync(); sheet.classList.add("show"); };
+  const close = () => sheet.classList.remove("show");
+  $("#pVar").onclick = open; $("#vVar").onclick = open; $("#varCancel").onclick = close;
+  sheet.onclick = e => { if (e.target === sheet) close(); };
+  $$("#varStr button").forEach(b => b.onclick = () => { cfg.d = +b.dataset.v; sync(); });
+  $$("#varN button").forEach(b => b.onclick = () => { cfg.n = +b.dataset.v; sync(); });
+  $("#varGo").onclick = async () => {
+    const it = vItem(); if (!it) return; close();
+    if (!it.prompt) { toast("Pas de prompt enregistré pour cette image", true); return; }
+    try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {}
+    const m = /^(\d+)x(\d+)$/.exec(it.size || ""), r8 = v => Math.max(64, Math.round(v / 8) * 8);
+    const w = m ? +m[1] : it.w, h = m ? +m[2] : it.h;  // taille de base (avant hires) si connue : plus léger sur 8 Go
+    const payload = {
+      prompt: it.prompt, negative_prompt: it.negative || "", init_path: it.path, denoising_strength: cfg.d,
+      width: r8(w || +S.width), height: r8(h || +S.height), sampler_name: it.sampler || S.sampler, scheduler: it.scheduler || S.scheduler,
+      steps: +it.steps || +S.steps, cfg_scale: +it.cfg || +S.cfg, seed: -1, n_iter: cfg.n, batch_size: 1,
+      alwayson_scripts: { "Never OOM Integrated": { args: [false, true] } },
+    };
+    try { await enqueue([{ payload, label: "Variation · " + jobLabel({ prompt: it.prompt, loras: [] }) }]); toast("Variation ajoutée à la file"); }
+    catch (e) { toast("Erreur : " + e.message, true); }
+  };
 }
 async function control(path, msg) {
   try { await api(path, { method: "POST" }); toast(msg); } catch (e) { toast("Action impossible", true); }
@@ -3082,7 +3126,7 @@ function bind() {
 }
 
 async function init() {
-  buildThemeSheet(); applyTheme(); setupSections(); renderRatios(); bind(); bindGallery(); bindAutocomplete(); bindSettings(); guardRanges(); bindImport(); bindNow(); bindTabs(); bindHighlight(); bindDock(); bindCivitai(); bindWide(); bindPhoto(); bindTipo();
+  buildThemeSheet(); applyTheme(); setupSections(); renderRatios(); bind(); bindGallery(); bindAutocomplete(); bindSettings(); guardRanges(); bindImport(); bindNow(); bindTabs(); bindHighlight(); bindDock(); bindCivitai(); bindWide(); bindPhoto(); bindTipo(); bindVariation();
   $$("#segLang button").forEach(b => { b.classList.toggle("on", b.dataset.v === LANG_PREF); b.onclick = () => { try { localStorage.setItem(LANGKEY, b.dataset.v); } catch (e) {} location.reload(); }; });
   startI18n();
   // mobile : le dock (Générer / file) se range pendant la saisie pour laisser la place au clavier et à l'autocomplétion

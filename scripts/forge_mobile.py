@@ -7,6 +7,7 @@ L'état partagé (prompt, LoRAs, format, hires...) est stocké dans
 shared_state.json, à la racine de l'extension.
 """
 
+import base64
 import hashlib
 import io
 import json
@@ -664,11 +665,32 @@ def _api_base():
     return f"http://127.0.0.1:{port}"
 
 
-def _run_job(job):
-    payload = dict(job["payload"])
-    payload.update(save_images=True, send_images=False, do_not_save_grid=True)
-    req = urllib.request.Request(_api_base() + "/sdapi/v1/txt2img", data=json.dumps(payload).encode("utf-8"),
+def _post_forge(endpoint, payload):
+    req = urllib.request.Request(_api_base() + endpoint, data=json.dumps(payload).encode("utf-8"),
                                  headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(req, timeout=None) as r:
+        return json.loads(r.read() or b"{}")
+
+
+def _prepare_payload(raw):
+    """Prépare le corps de la requête Forge. Renvoie (endpoint, payload).
+    Variation = img2img à partir d'une image déjà générée (« init_path », vérifié contre les dossiers outputs)."""
+    payload = dict(raw)
+    init = payload.pop("init_path", None)
+    endpoint = "/sdapi/v1/txt2img"
+    if init:
+        real = _safe_image(init)
+        payload["init_images"] = [base64.b64encode(real.read_bytes()).decode("ascii")]
+        payload.setdefault("resize_mode", 0)
+        for k in [k for k in payload if k == "enable_hr" or k.startswith("hr_")]:
+            payload.pop(k)
+        endpoint = "/sdapi/v1/img2img"
+    payload.update(save_images=True, send_images=False, do_not_save_grid=True)
+    return endpoint, payload
+
+
+def _run_job(job):
+    endpoint, payload = _prepare_payload(job["payload"])
     # Pas de copie JPG automatique des grosses images (« Save copy of large images as JPG »).
     # Forge ignore override_settings dans l'API : on coupe l'option le temps du job, sans toucher à config.json.
     data_opts = getattr(shared.opts, "data", None)
@@ -676,8 +698,15 @@ def _run_job(job):
     if isinstance(data_opts, dict):
         data_opts["export_for_4chan"] = False
     try:
-        with urllib.request.urlopen(req, timeout=None) as r:
-            data = json.loads(r.read() or b"{}")
+        try:
+            data = _post_forge(endpoint, payload)
+        except urllib.error.HTTPError as e:
+            # img2img : si le script « Never OOM » n'est pas reconnu côté img2img, on relance sans lui
+            if endpoint.endswith("/img2img") and e.code == 422 and payload.get("alwayson_scripts"):
+                payload.pop("alwayson_scripts", None)
+                data = _post_forge(endpoint, payload)
+            else:
+                raise
     finally:
         if isinstance(data_opts, dict):
             if old_jpg is None:
