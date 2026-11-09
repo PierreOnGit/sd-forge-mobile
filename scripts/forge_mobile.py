@@ -116,6 +116,7 @@ DEFAULT_STATE = {
         "steps": 0,
         "tiled": True,
     },
+    "adetailer": {"enabled": False, "denoise": 0.3, "faces": 1},
     "sampler": "DPM++ 2M",
     "scheduler": "Karras",
     "steps": 28,
@@ -701,12 +702,18 @@ def _run_job(job):
         try:
             data = _post_forge(endpoint, payload)
         except urllib.error.HTTPError as e:
-            # img2img : si le script « Never OOM » n'est pas reconnu côté img2img, on relance sans lui
-            if endpoint.endswith("/img2img") and e.code == 422 and payload.get("alwayson_scripts"):
+            scripts = payload.get("alwayson_scripts") or {}
+            if e.code != 422 or not scripts:
+                raise
+            # un script « always on » refusé (ADetailer absent / désactivé, Never OOM inconnu en img2img) : on le retire et on relance
+            if "ADetailer" in scripts:
+                scripts.pop("ADetailer", None)
+                _log("ADetailer refusé par Forge : job relancé sans correction")
+            elif endpoint.endswith("/img2img"):
                 payload.pop("alwayson_scripts", None)
-                data = _post_forge(endpoint, payload)
             else:
                 raise
+            data = _post_forge(endpoint, payload)
     finally:
         if isinstance(data_opts, dict):
             if old_jpg is None:
