@@ -190,12 +190,8 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   body.gwide section[data-sec=gallery]>.body{padding:0}
   body.gwide .gbar,body.gwide .gactive,body.gwide .gpanel,body.gwide .selbar,body.gwide .pager{margin-left:10px;margin-right:10px}
   body.gwide .gscroll{max-height:none;overflow:visible;border-radius:0;padding:0}
-  body.gwide .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-  body.gwide .gallery[data-size="s"]{grid-template-columns:repeat(5,1fr)}
-  body.gwide .gallery[data-size="l"]{grid-template-columns:repeat(2,1fr)}
-  body.gwide .gallery .tile{aspect-ratio:1;border-radius:0;border:0;flex:none}
   body.gwide .gallery .gfill{display:none}
-  body.gwide .gday{grid-column:1/-1;margin:16px 12px 6px;font-size:16px}
+  body.gwide .gday{grid-column:1/-1;font-size:16px}
   body.gwide .tile .badge{display:none}
 }
 @media (min-width:1100px){
@@ -299,12 +295,11 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .round.add{font-size:24px;font-weight:300;color:var(--text)}
 .go.resume{background:linear-gradient(135deg,#2fd0a0,#6be3c4);box-shadow:0 8px 24px rgba(47,208,160,.4),inset 0 1px 0 rgba(255,255,255,.35)}
 
-/* mobile : galerie en haut, compositeur (prompt + Générer) en bas, réglages derrière le bouton Studio */
+/* mobile : galerie en grandes tuiles, bloc de saisie unique en bas (prompt + « + » + format/nombre + envoyer), réglages derrière « + » */
 :root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px);--ch:150px}
-.cbar,.cfgbar,#cfgOpen{display:none}
+.cfgbar,#cfgOpen,.cmpplus,.cmppill,.cmpsp,.cmpshut,.cmppop{display:none}
 @media (max-width:1099px){
-  .mtabs,.rail,#gJump{display:none !important}
-  #cfgOpen{display:grid}
+  .mtabs,.rail,#gJump,#cfgOpen{display:none !important}
   body{padding-bottom:calc(var(--ch) + 12px)}
   .controls{display:none}
   body.cfgopen{overflow:hidden}
@@ -312,22 +307,53 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   body.cfgopen .cfgbar{display:flex;position:sticky;top:0;z-index:3;align-items:center;justify-content:space-between;margin:0 -12px 8px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:var(--bg)}
   .cfgbar h2{margin:0;font-size:18px}
   body.cfgopen #composer{display:none}
-  #composer{position:fixed;left:0;right:0;bottom:var(--kb);z-index:30;display:flex;flex-direction:column;gap:8px;max-width:680px;margin:0 auto;padding:6px 10px calc(8px + var(--sab));pointer-events:none}
-  #composer>*{pointer-events:auto}
+  /* bloc de saisie */
+  #composer{position:fixed;left:0;right:0;bottom:var(--kb);z-index:30;max-width:680px;margin:0 auto;padding:12px 14px calc(10px + var(--sab));display:flex;flex-direction:column;gap:6px;
+    background:var(--pop);border:1px solid var(--stroke);border-bottom:0;border-radius:28px 28px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
   body.typing:not(.psheet) #composer{display:none}
-  #composer section[data-sec=prompt]{margin:0;box-shadow:0 -6px 30px rgba(0,0,0,.35)}
+  #composer section[data-sec=prompt]{position:static;margin:0;background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0}
   #composer section[data-sec=prompt]>.head{display:none}
-  #composer section[data-sec=prompt]>.body{display:block !important;padding:8px 10px 10px;max-height:min(58vh,calc(var(--vvh) - 130px));overflow-y:auto;overscroll-behavior:contain}
-  #composer textarea#prompt{min-height:58px;max-height:96px}
+  #composer section[data-sec=prompt]>.body{display:block !important;padding:0;max-height:min(46vh,calc(var(--vvh) - 200px));overflow-y:auto;overscroll-behavior:contain}
+  #composer .hl textarea,#composer .hl .hlb{padding:6px 2px;font-size:17px;border-width:0;border-radius:0}
+  #composer .acwrap.hl{background:transparent !important;border:0;box-shadow:none}
+  #composer .hl textarea{resize:none}
+  #composer .hl textarea:focus{box-shadow:none;border-color:transparent}
+  #composer .hl textarea#prompt{min-height:54px;max-height:90px}
   body:not(.psheet) #composer :is(.pcheck,.tipo,.actloras,.negbox){display:none !important}
-  #composer .dock{position:static;left:auto;right:auto;bottom:auto;max-width:none;width:auto;margin:0;padding:8px;border-radius:26px;transform:none !important;opacity:1 !important;pointer-events:auto !important}
-  #composer .dock .go{padding:14px}
-  #composer .dock .round{width:46px;height:46px}
-  body.psheet #composer section[data-sec=prompt]>.body{max-height:min(62vh,calc(var(--vvh) - 110px))}
-  body.psheet #composer textarea#prompt{min-height:120px;max-height:34vh}
-  body.psheet #composer .dock{display:none}
-  body.psheet #composer .cbar{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;z-index:2;padding:10px 0 2px;margin-top:8px;background:linear-gradient(to bottom,transparent,var(--pop) 28%)}
-  .cbar .go{padding:14px}
+  body.psheet #composer .hl textarea#prompt{min-height:110px;max-height:30vh}
+  body.psheet #composer section[data-sec=prompt]>.body{max-height:min(54vh,calc(var(--vvh) - 150px))}
+  #composer .cmpshut{position:absolute;top:-17px;right:18px;width:34px;height:34px;border-radius:50%;border:1px solid var(--stroke);background:var(--pop);color:var(--text);place-items:center;cursor:pointer;padding:0}
+  body.psheet #composer .cmpshut{display:grid}
+  #composer .cmpshut svg{width:18px;height:18px}
+  /* rangée d'actions */
+  #composer .dock.glass{position:static;left:auto;right:auto;bottom:auto;max-width:none;width:auto;margin:0;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;transform:none !important;opacity:1 !important;pointer-events:auto !important}
+  #composer .dockinfo{text-align:left;margin:0 0 6px 2px}
+  #composer .dockrow{gap:8px}
+  #composer .dock .round{width:44px;height:44px;order:5}
+  #composer .dock .round svg{width:20px;height:20px}
+  #composer .dock .dthumb{order:3;width:44px;height:44px;border-radius:14px}
+  #composer .cmpplus{display:flex;order:1;flex:none;width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--text);font-size:30px;font-weight:300;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  #composer .cmppill{display:flex;order:2;flex:none;height:44px;padding:0 14px;border-radius:99px;border:1px solid var(--field-stroke);background:var(--field);color:var(--text);gap:8px;align-items:center;font-weight:650;font-size:14px;cursor:pointer;white-space:nowrap}
+  #composer .cmppill .rb{display:block;border:2px solid currentColor;border-radius:3px;opacity:.75}
+  #composer .cmpsp{display:block;order:4;flex:1}
+  #composer .dock .go{order:9;flex:none;width:52px;height:52px;padding:0;border-radius:50%;font-size:0;line-height:0;display:grid;place-items:center}
+  #composer .dock .go::before{content:"";width:22px;height:22px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat}
+  #composer .dock .go.resume::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z'/%3E%3C/svg%3E");width:18px;height:18px}
+  #composer .cmppop.show{display:block;position:absolute;left:12px;right:12px;bottom:calc(100% + 10px);padding:14px;border-radius:22px;z-index:5;background:linear-gradient(var(--pop),var(--pop)),var(--bg)}
+  .cmppop .group-title{margin:0 0 8px}
+  .cmppop .group-title:not(:first-child){margin-top:14px}
+  .cmppop .chips{display:flex;flex-wrap:wrap;gap:6px}
+  /* galerie : grandes tuiles arrondies */
+  body.gwide .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 10px}
+  body.gwide .gallery[data-size="s"]{grid-template-columns:repeat(3,1fr);gap:6px}
+  body.gwide .gallery[data-size="l"]{grid-template-columns:repeat(1,1fr)}
+  body.gwide .gallery .tile{aspect-ratio:3/4;border-radius:20px;border:0;flex:none}
+  body.gwide .gallery[data-size="s"] .tile{border-radius:14px}
+  body.gwide .gday{margin:16px 4px 4px}
+  body.gwide .gbar{flex-wrap:wrap;gap:8px}
+  body.gwide .gbar input#gq{flex:1 0 100%;border-radius:99px;padding:12px 18px}
+  body.gwide .gbtn{width:auto;min-width:44px;height:44px;border-radius:99px;padding:0 14px}
+  body.gwide .gzoom{border-radius:99px;height:44px}
 }
 #viewerImg{cursor:zoom-in}
 .sheet.varsheet{z-index:60;padding:0}
@@ -644,7 +670,7 @@ section.cfg{padding:6px 6px 14px}
         <div class="acwrap hl neg"><pre class="hlb" id="negativeHl" aria-hidden="true"></pre><textarea id="negative" data-key="negative" data-ac placeholder="lowres, worst quality, …" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea></div>
       </details>
       <div class="ac" id="ac"></div>
-      <div class="cbar"><button class="go" id="pGo">Générer</button><button class="round show" id="pShut" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button></div>
+      <button class="cmpshut" id="cmpShut" aria-label="Réduire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     </div>
   </section>
 
@@ -793,7 +819,14 @@ section.cfg{padding:6px 6px 14px}
 
 <div class="dock glass">
   <div class="dockinfo" id="dockInfo"></div>
+  <div class="cmppop glass" id="cmpPop">
+    <div class="group-title">Format</div><div class="chips" id="pRatios"></div>
+    <div class="group-title">Nombre d'images</div><div class="seg" id="pCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button><button data-v="8">8</button></div>
+  </div>
   <div class="dockrow">
+    <button class="cmpplus" id="cmpPlus" aria-label="Studio" title="Studio : réglages, LoRAs, tags…">+</button>
+    <button class="cmppill" id="cmpPill" aria-label="Format et nombre d'images"><i class="rb" id="cmpRb"></i><span id="cmpPillTxt"></span></button>
+    <span class="cmpsp"></span>
     <button class="grip" id="dockGrip" title="Glisser pour déplacer · double-clic pour replacer" aria-label="Déplacer">⠿</button>
     <button class="dthumb" id="dThumb" title="Dernière image"><img id="dThumbImg" alt=""></button>
     <button class="go" id="go">Générer</button>
@@ -1615,10 +1648,26 @@ function ensureOption(sel, v) {
   if (!Array.from(sel.options).some(o => o.value === String(v))) { const o = document.createElement("option"); o.value = v; o.textContent = v; sel.appendChild(o); }
   sel.value = v;
 }
+function renderPill() {
+  if (!S || !$("#cmpPill")) return;
+  const w = +S.width, h = +S.height, n = Math.max(1, +S.batch_count || 1);
+  const r = [...RATIOS_NATIVE, ...RATIOS_LIGHT].find(x => x[1] === w && x[2] === h);
+  const k = 16 / Math.max(w, h), rb = $("#cmpRb"); rb.style.width = Math.max(8, Math.round(w * k)) + "px"; rb.style.height = Math.max(8, Math.round(h * k)) + "px";
+  $("#cmpPillTxt").textContent = `${r ? r[0] : w + "×" + h} · x${n}`;
+  const box = $("#pRatios"); box.textContent = "";
+  const list = sizeClass() === "light" ? RATIOS_LIGHT : RATIOS_NATIVE;
+  for (const label of RATIO_ORDER) {
+    const x = list.find(y => y[0] === label); if (!x) continue;
+    const c = document.createElement("button"); c.className = "chip" + (w === x[1] && h === x[2] ? " on" : ""); c.textContent = label; c.title = `${x[1]}×${x[2]}`;
+    c.onclick = () => { S.width = x[1]; S.height = x[2]; render(); changed(); };
+    box.appendChild(c);
+  }
+  $$("#pCount button").forEach(b => b.classList.toggle("on", +b.dataset.v === n));
+}
 function renderAd() { const f = +((S.adetailer || {}).faces ?? 1); $$("#adFaces button").forEach(b => b.classList.toggle("on", +b.dataset.v === f)); }
 function render() {
   if (!S) return;
-  renderAd();
+  renderAd(); renderPill();
   const active = document.activeElement;
   for (const el of $$("[data-key]")) {
     if (el === active) continue;
@@ -1662,7 +1711,6 @@ function goLabel() {
   const go = $("#go");
   go.classList.toggle("resume", paused);
   go.textContent = paused ? `▶ Reprendre la file · ${Q.pending.length}` : busy ? (n > 1 ? `Ajouter ${n} images à la file` : "Ajouter à la file") : (n > 1 ? `Générer ${n} images` : "Générer");
-  const pg = $("#pGo"); if (pg) { pg.textContent = go.textContent; pg.classList.toggle("resume", paused); }
   $("#qAddBtn").classList.toggle("show", paused);
   $("#qPauseBtn").classList.toggle("show", !!(Q && !Q.paused && Q.running && Q.pending.length));
 }
@@ -3180,8 +3228,15 @@ async function init() {
     const open = () => { if (mq.matches && !document.body.classList.contains("psheet")) { document.body.classList.add("psheet"); syncKb(); } };
     const close = () => { document.body.classList.remove("psheet"); if (isField(document.activeElement)) document.activeElement.blur(); };
     document.addEventListener("focusin", e => { if (e.target.id === "prompt" || e.target.id === "negative") open(); });
-    $("#pShut").onclick = close;
-    $("#pGo").onclick = () => { $("#go").click(); close(); };
+    $("#cmpShut").onclick = close;
+    // taper ailleurs (ou faire défiler la galerie) referme le clavier et le menu format
+    document.addEventListener("pointerdown", e => {
+      if (!mq.matches) return;
+      if (!e.target.closest("#cmpPop, #cmpPill")) $("#cmpPop").classList.remove("show");
+      if (document.body.classList.contains("psheet") && !e.target.closest("#composer, #ac, #toast, .toast")) close();
+    }, true);
+    $("#cmpPill").onclick = () => $("#cmpPop").classList.toggle("show");
+    $$("#pCount button").forEach(b => b.onclick = () => { S.batch_count = +b.dataset.v; render(); changed(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("psheet")) close(); });
     // sheet Studio (tous les réglages sauf le prompt)
     const cfg = on => {
@@ -3190,7 +3245,7 @@ async function init() {
       else if (history.state && history.state.cfg) history.back();
       else document.body.classList.remove("cfgopen");
     };
-    $("#cfgOpen").onclick = () => cfg(true); $("#cfgClose").onclick = () => cfg(false);
+    $("#cfgClose").onclick = () => cfg(false); $("#cmpPlus").onclick = () => cfg(true);
     addEventListener("popstate", () => document.body.classList.remove("cfgopen"));
   }
   let hlOn = true; try { hlOn = localStorage.getItem(HLKEY) !== "0"; } catch (e) {}

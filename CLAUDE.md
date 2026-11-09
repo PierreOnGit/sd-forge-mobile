@@ -42,7 +42,8 @@ Runtime files written next to the extension (all git-ignored): `shared_state.jso
 - Shared state synced between devices through `/mobile/api/state`.
 - **i18n**: French source strings; client-side `EN` dictionary + `EN_PAT` regexes, `tr()`, MutationObserver translating text nodes and `placeholder/title/aria-label`. Areas excluded via `I18N_SKIP`. Composite strings are split on ` · `. Language selector `#segLang` (auto/fr/en, localStorage `forgeMobileLang`). **Every new French string needs an `EN` entry.**
 - Desktop: wide gallery mode, draggable floating dock with magnet (Generate / Resume / Pause), paginated gallery with internal scroll.
-- Mobile: Studio / Gallery tabs (`body.gwide`), photo mode (swipe, pinch & double-tap zoom, swipe-down close, `history.pushState` so Android back closes it).
+- Mobile (<1100 px): gallery is the main screen (`body.gwide` forced, 2-column rounded tiles). The prompt section + dock are moved by JS into a fixed bottom `#composer` (compact prompt → expands on focus as `body.psheet`, with « + » = Studio sheet `body.cfgopen`, format/count pill `#cmpPill`, round send button). Every other setting lives in the Studio sheet (`.controls`). Photo mode: swipe, pinch & double-tap zoom, swipe-down close, `history.pushState` so Android back closes it. Wide viewer (≥1100 px): tapping the image opens photo mode (`forcePhoto`).
+- **Variation** = img2img job (`payload.init_path`, resolved server-side through `_safe_image`); **ADetailer** = optional conservative preset (`state.adetailer`), dropped automatically if Forge answers 422.
 - Prompt editor: colored overlay (`hlRender`), autocomplete (Enter/Tab pick), prompt checker, tag library built from image metadata.
 
 ## Dev & test workflow
