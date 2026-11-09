@@ -184,7 +184,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   /* onglet Galerie : façon appli Photos */
   body.gwide{padding-left:0;padding-right:0}
   body.gwide header{position:sticky;top:0;z-index:9;margin:0 0 6px;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-  body.gwide .controls,body.gwide #gWide,body.gwide .gnav,body.gwide .nowcard,body.gwide .banner{display:none !important}
+  body.gwide #gWide,body.gwide .gnav,body.gwide .nowcard{display:none !important}
   body.gwide section[data-sec=gallery]{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;margin:0}
   body.gwide section[data-sec=gallery]>.head{display:none}
   body.gwide section[data-sec=gallery]>.body{padding:0}
@@ -197,8 +197,6 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   body.gwide .gallery .gfill{display:none}
   body.gwide .gday{grid-column:1/-1;margin:16px 12px 6px;font-size:16px}
   body.gwide .tile .badge{display:none}
-  body.gwide .dock{left:auto;right:12px;width:auto;padding:6px;border-radius:24px}
-  body.gwide .dock .go,body.gwide .dock #qAddBtn,body.gwide .dock #qPauseBtn,body.gwide .dock #skip,body.gwide .dockinfo{display:none !important}
 }
 @media (min-width:1100px){
   .round.jump{display:none}
@@ -301,20 +299,37 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .round.add{font-size:24px;font-weight:300;color:var(--text)}
 .go.resume{background:linear-gradient(135deg,#2fd0a0,#6be3c4);box-shadow:0 8px 24px rgba(47,208,160,.4),inset 0 1px 0 rgba(255,255,255,.35)}
 
-/* fenêtre de saisie ancrée en bas (mobile) */
-:root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px)}
-.pbar,.pspacer,#pScrim{display:none}
+/* mobile : galerie en haut, compositeur (prompt + Générer) en bas, réglages derrière le bouton Studio */
+:root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px);--ch:150px}
+.pbar,.cfgbar,#cfgOpen{display:none}
 @media (max-width:1099px){
-  body.psheet #pScrim{display:block;position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.38)}
-  body.psheet .dock{display:none}
-  body.psheet .pspacer{display:block}
-  body.psheet section[data-sec=prompt]{position:fixed;left:8px;right:8px;bottom:calc(var(--kb) + 8px);z-index:30;max-width:640px;margin:0 auto;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
-  body.psheet section[data-sec=prompt]>.head{display:none}
-  body.psheet section[data-sec=prompt]>.body{display:block !important;max-height:calc(var(--vvh) - 24px);overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 0}
-  body.psheet textarea#prompt{min-height:120px;max-height:36vh}
-  body.psheet .pbar{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;z-index:2;padding:10px 0 calc(12px + var(--sab));margin-top:8px;background:linear-gradient(to bottom,transparent,var(--pop) 28%)}
+  .mtabs,.rail,#gJump{display:none !important}
+  #cfgOpen{display:grid}
+  body{padding-bottom:calc(var(--ch) + 12px)}
+  .controls{display:none}
+  body.cfgopen{overflow:hidden}
+  body.cfgopen .controls{display:block;position:fixed;inset:0;z-index:40;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);padding:0 12px calc(24px + env(safe-area-inset-bottom))}
+  body.cfgopen .cfgbar{display:flex;position:sticky;top:0;z-index:3;align-items:center;justify-content:space-between;margin:0 -12px 8px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:var(--bg)}
+  .cfgbar h2{margin:0;font-size:18px}
+  body.cfgopen #composer{display:none}
+  #composer{position:fixed;left:0;right:0;bottom:var(--kb);z-index:30;display:flex;flex-direction:column;gap:8px;max-width:680px;margin:0 auto;padding:6px 10px calc(8px + var(--sab));pointer-events:none}
+  #composer>*{pointer-events:auto}
+  body.typing:not(.psheet) #composer{display:none}
+  #composer section[data-sec=prompt]{margin:0;box-shadow:0 -6px 30px rgba(0,0,0,.35)}
+  #composer section[data-sec=prompt]>.head{display:none}
+  #composer section[data-sec=prompt]>.body{display:block !important;padding:8px 10px 10px;max-height:min(58vh,calc(var(--vvh) - 130px));overflow-y:auto;overscroll-behavior:contain}
+  #composer textarea#prompt{min-height:58px;max-height:96px}
+  body:not(.psheet) #composer :is(.pcheck,.tipo,.actloras,.negbox){display:none !important}
+  #composer .dock{position:static;left:auto;right:auto;bottom:auto;max-width:none;width:auto;margin:0;padding:8px;border-radius:26px;transform:none !important;opacity:1 !important;pointer-events:auto !important}
+  #composer .dock .go{padding:14px}
+  #composer .dock .round{width:46px;height:46px}
+  body.psheet #composer section[data-sec=prompt]>.body{max-height:min(62vh,calc(var(--vvh) - 110px))}
+  body.psheet #composer textarea#prompt{min-height:120px;max-height:34vh}
+  body.psheet #composer .dock{display:none}
+  body.psheet #composer .pbar{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;z-index:2;padding:10px 0 2px;margin-top:8px;background:linear-gradient(to bottom,transparent,var(--pop) 28%)}
   .pbar .go{padding:14px}
 }
+#viewerImg{cursor:zoom-in}
 
 /* feuilles (visionneuse, thème) */
 .sheet{position:fixed;inset:0;z-index:20;display:none;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:auto;padding:calc(14px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom))}
@@ -585,6 +600,7 @@ section.cfg{padding:6px 6px 14px}
     <h1><span>Forge</span></h1>
     <div class="mtabs" id="mTabs"><button data-t="studio">Studio</button><button data-t="gal">Galerie</button></div>
     <div class="spacer"></div>
+    <button class="iconbtn glass" id="cfgOpen" aria-label="Studio" title="Réglages de génération"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>
     <div class="pill glass"><span class="dot" id="syncDot"></span><span id="syncText">…</span></div>
     <button class="iconbtn glass" id="themeBtn" aria-label="Réglages">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -595,6 +611,7 @@ section.cfg{padding:6px 6px 14px}
 
   <button class="rail glass" id="rail" title="Revenir au prompt (Échap)"><span>✎ Prompt</span></button>
   <div class="controls">
+  <div class="cfgbar"><h2>Studio</h2><button class="iconbtn glass" id="cfgClose" aria-label="Fermer">✕</button></div>
 
   <section class="card glass studio" data-sec="prompt">
     <div class="head"><h2>Prompt</h2><div class="legend" id="hlLegend"></div><span class="hint" id="promptHint"></span><button class="hltog" id="hlToggle" title="Coloration des tags">Couleurs</button><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg></div>
@@ -886,7 +903,6 @@ section.cfg{padding:6px 6px 14px}
 </div>
 
 <div class="dockslot" id="dockSlot"></div>
-<div id="pScrim"></div>
 
 <div class="drop" id="drop"><div>Déposer le LoRA ici<small>.safetensors · il sera copié dans models/Lora</small></div></div>
 
@@ -1323,11 +1339,12 @@ function bindHighlight() {
 /* ===================== galerie agrandie / raccourcis ===================== */
 const WKEY = "forgeMobileWide";
 function setWide(on) {
+  const forced = matchMedia("(max-width:1099px)").matches;  // mobile : la galerie est toujours l'écran principal
+  if (forced) on = true;
   document.body.classList.toggle("gwide", on);
-  if (on && window._closePromptSheet) window._closePromptSheet();
   renderMTabs();
   window._jumpSync && window._jumpSync();
-  try { localStorage.setItem(WKEY, on ? "1" : "0"); } catch (e) {}
+  if (!forced) try { localStorage.setItem(WKEY, on ? "1" : "0"); } catch (e) {}
   $("#gWide").title = on ? "Revenir à la vue normale (Échap)" : "Agrandir la galerie (Échap pour revenir)";
 }
 function renderMTabs() { const on = document.body.classList.contains("gwide"); $$("#mTabs button").forEach(b => b.classList.toggle("on", (b.dataset.t === "gal") === on)); }
@@ -1885,7 +1902,6 @@ function restoreJob(j) {
               denoise: p.denoising_strength ?? S.hires.denoise, steps: p.hr_second_pass_steps ?? S.hires.steps };
   render(); changed();
   if (document.body.classList.contains("gwide")) setWide(false);
-  if (innerWidth < 1100) window.scrollTo({ top: 0, behavior: "smooth" });
   toast("Prompt et réglages remis", false, { label: "Annuler", fn: () => { S = before; render(); changed(); } });
 }
 function qbtn(txt, title, fn) { const b = document.createElement("button"); b.className = "qb"; b.textContent = txt; b.title = title; b.setAttribute("aria-label", title); b.onclick = fn; return b; }
@@ -2167,7 +2183,8 @@ async function openPath(path) {
   try { const rec = await api("/mobile/api/record?path=" + encodeURIComponent(path)); openViewer(-1, rec); }
   catch (e) { toast("Image introuvable", true); }
 }
-function photoMode() { return innerWidth < 1100; }
+let forcePhoto = false;
+function photoMode() { return innerWidth < 1100 || forcePhoto; }
 function placeMeta() {
   const meta = $(".vmeta"), target = photoMode() ? $("#pInfoBody") : $(".vpanel");
   if (meta.parentElement !== target) target.appendChild(meta);
@@ -2376,7 +2393,7 @@ async function viewerStep(d) {
   else if (i < 0 && gPage > 0) { await loadGallery("page", gPage - 1); openViewer(gItems.length - 1); }
 }
 function closeViewer(fromPop = false) {
-  $("#viewer").classList.remove("show"); $("#viewerImg").src = ""; vIndex = -1; vSolo = null;
+  $("#viewer").classList.remove("show"); $("#viewerImg").src = ""; vIndex = -1; vSolo = null; forcePhoto = false;
   if ($("#photo").classList.contains("show")) {
     $("#photo").classList.remove("show"); setInfo(false); document.documentElement.style.overflow = "";
     if (!fromPop && history.state && history.state.photo) history.back();
@@ -2417,8 +2434,7 @@ function reuse(all) {
   }
   render(); changed(); closeViewer(); toast(all ? "Prompt, LoRAs et réglages repris" : "Prompt et LoRAs repris");
   setWide(false);
-  if (window.innerWidth < 1100) window.scrollTo({ top: 0, behavior: "smooth" });
-  else window.scrollTo({ top: 0, behavior: "smooth" });
+  if (window.innerWidth >= 1100) window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function bindGallery() {
   let qt = null;
@@ -2447,6 +2463,7 @@ function bindGallery() {
   $("#gMenuBtn").onclick = e => { e.stopPropagation(); $("#gMenu").classList.toggle("show"); };
   document.addEventListener("click", e => { if (!e.target.closest(".gmenuwrap")) $("#gMenu").classList.remove("show"); });
   $("#gMenu").addEventListener("click", () => $("#gMenu").classList.remove("show"));
+  $("#viewerImg").onclick = () => { if (innerWidth < 1100 || !vItem()) return; forcePhoto = true; $("#viewer").classList.remove("show"); placeMeta(); showPhoto(); };
   $("#vPrev").onclick = () => viewerStep(-1);
   $("#vNext").onclick = () => viewerStep(1);
   $("#vFav").onclick = toggleFav;
@@ -3072,32 +3089,47 @@ async function init() {
   const isField = el => el && (el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && !/^(checkbox|radio|range|button|submit|file|color)$/.test(el.type)));
   document.addEventListener("focusin", e => { if (isField(e.target)) document.body.classList.add("typing"); });
   document.addEventListener("focusout", () => setTimeout(() => { if (!isField(document.activeElement)) document.body.classList.remove("typing"); }, 120));
-  // mobile : fenêtre de saisie ancrée en bas (au-dessus du clavier) avec Générer intégré
+  // mobile : compositeur en bas (prompt compact -> fenêtre de saisie au focus, galerie au-dessus) + réglages dans le sheet Studio
   {
     const sec = $("section[data-sec=prompt]"), root = document.documentElement.style, vv = window.visualViewport;
-    const mob = () => matchMedia("(max-width:1099px)").matches && !document.body.classList.contains("gwide");
+    const mq = matchMedia("(max-width:1099px)");
     const syncKb = () => {
       const h = vv ? vv.height : innerHeight, kb = vv ? Math.max(0, innerHeight - vv.height - vv.offsetTop) : 0;
       root.setProperty("--kb", kb + "px"); root.setProperty("--vvh", h + "px");
       root.setProperty("--sab", kb > 80 ? "0px" : "env(safe-area-inset-bottom,0px)");
     };
     if (vv) { vv.addEventListener("resize", syncKb); vv.addEventListener("scroll", syncKb); }
-    const open = () => {
-      if (!mob() || document.body.classList.contains("psheet")) return;
-      const sp = document.createElement("div"); sp.className = "pspacer"; sp.id = "pSpacer";
-      sp.style.height = sec.offsetHeight + (parseFloat(getComputedStyle(sec).marginBottom) || 0) + "px";
-      sec.before(sp); document.body.classList.add("psheet"); syncKb();
+    let ro = null;
+    const place = () => {
+      const dock = $(".dock"), ctl = $(".controls");
+      if (mq.matches) {
+        let c = $("#composer");
+        if (!c) { c = document.createElement("div"); c.id = "composer"; document.body.appendChild(c); }
+        if (sec.parentElement !== c) c.append(sec, dock);
+        if (!ro && window.ResizeObserver) { ro = new ResizeObserver(() => root.setProperty("--ch", c.offsetHeight + "px")); ro.observe(c); }
+      } else if (sec.parentElement && sec.parentElement.id === "composer") {
+        ctl.insertBefore(sec, ctl.querySelector(".cfgbar").nextSibling); $("#photo").before(dock);
+        document.body.classList.remove("psheet", "cfgopen"); root.setProperty("--ch", "0px");
+      }
+      syncKb();
     };
-    const close = () => {
-      document.body.classList.remove("psheet"); $("#pSpacer")?.remove();
-      if (isField(document.activeElement)) document.activeElement.blur();
-    };
-    window._closePromptSheet = close;
+    mq.addEventListener("change", () => { place(); setWide(localStorage.getItem(WKEY) === "1"); });
+    place();
+    const open = () => { if (mq.matches && !document.body.classList.contains("psheet")) { document.body.classList.add("psheet"); syncKb(); } };
+    const close = () => { document.body.classList.remove("psheet"); if (isField(document.activeElement)) document.activeElement.blur(); };
     document.addEventListener("focusin", e => { if (e.target.id === "prompt" || e.target.id === "negative") open(); });
-    $("#pShut").onclick = close; $("#pScrim").onclick = close;
+    $("#pShut").onclick = close;
     $("#pGo").onclick = () => { $("#go").click(); close(); };
     document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("psheet")) close(); });
-    syncKb();
+    // sheet Studio (tous les réglages sauf le prompt)
+    const cfg = on => {
+      if (on === document.body.classList.contains("cfgopen")) return;
+      if (on) { close(); document.body.classList.add("cfgopen"); try { history.pushState({ cfg: 1 }, ""); } catch (e) {} }
+      else if (history.state && history.state.cfg) history.back();
+      else document.body.classList.remove("cfgopen");
+    };
+    $("#cfgOpen").onclick = () => cfg(true); $("#cfgClose").onclick = () => cfg(false);
+    addEventListener("popstate", () => document.body.classList.remove("cfgopen"));
   }
   let hlOn = true; try { hlOn = localStorage.getItem(HLKEY) !== "0"; } catch (e) {}
   setHl(hlOn); $("#hlToggle").onclick = () => setHl(document.body.classList.contains("nohl"));
