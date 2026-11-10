@@ -306,6 +306,8 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 /* mobile : galerie en grandes tuiles, bloc de saisie unique en bas (prompt + « + » + format/nombre + envoyer), réglages derrière « + » */
 :root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px);--ch:150px}
 .cfgbar,#cfgOpen,.cmpplus,.cmppill,.cmpsp,.cmpshut,.cmppop{display:none}
+.cmsw{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+#cmpPop{max-height:68vh;overflow-y:auto}
 .cmlr{display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;margin-bottom:10px}
 .cmlr .nm{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cmlr .wv{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -356,8 +358,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   #composer .dock .go{order:9;flex:none;width:52px;height:52px;padding:0;border-radius:50%;font-size:0;line-height:0;display:grid;place-items:center}
   #composer .dock .go::before{content:"";width:22px;height:22px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat}
   #composer .dock .go{position:relative}
-  #composer .dock .go.adding::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E")}
-  #composer .dock .go.adding::after{content:attr(data-n);position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;line-height:20px;text-align:center}
+  #composer .dock .go.adding::after{content:attr(data-n);position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:var(--bg);color:var(--text);border:2px solid var(--accent);font-size:11.5px;font-weight:700;line-height:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.4)}
   #composer .dock .go.resume::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z'/%3E%3C/svg%3E");width:18px;height:18px}
   #composer .cmppop.show{display:block;position:absolute;left:12px;right:12px;bottom:calc(100% + 10px);padding:14px;border-radius:22px;z-index:5;background:linear-gradient(var(--pop),var(--pop)),var(--bg)}
   .cmppop .group-title{margin:0 0 8px}
@@ -658,6 +659,38 @@ body:not(.psheet) #composer .cmpref{display:none !important}
 .cmpref img{width:100%;height:100%;object-fit:cover;border-radius:14px;display:block}
 .cmpref button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:1px solid var(--stroke);background:var(--pop);color:var(--text);font-size:11px;cursor:pointer;line-height:1}
 .tile .tact,.tile .cap{display:none}
+
+/* bloc de saisie : prompt en grand, outils IA / LoRAs regroupés sur une seule ligne */
+body.psheet #composer section[data-sec=prompt]>.body{display:flex !important;flex-wrap:wrap;align-items:center;gap:6px 8px}
+body.psheet #composer .cmpref:not([hidden]){order:0;width:56px;height:56px;margin:0 4px 0 0;align-self:flex-start}
+body.psheet #composer .acwrap.hl{order:0;flex:1 0 100%;min-width:0}
+body.psheet #composer:has(.cmpref:not([hidden])) .acwrap.hl{flex-basis:calc(100% - 66px)}
+body.psheet #composer .pcheck{order:1;flex:1 1 auto;margin:0}
+body.psheet #composer .tipo,body.psheet #composer .tiporow,body.psheet #composer .actloras{display:contents !important}
+body.psheet #composer .tbtn{order:2;padding:5px 10px;font-size:12px}
+body.psheet #composer .tlen{order:3;flex:none}
+body.psheet #composer .tlen button{padding:4px 8px;font-size:11.5px}
+body.psheet #composer .actloras .chip{order:4;padding:4px 9px;font-size:12px}
+body.psheet #composer .tipodesc,body.psheet #composer .tipobox,body.psheet #composer .negbox{order:5;flex:0 0 100%}
+body.psheet #composer .hl textarea#prompt{min-height:120px}
+#qSide{display:none}
+#qToggle{display:none}
+@media (min-width:1100px){
+  #qToggle{display:grid !important}
+  #qToggle b{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}
+  #qToggle b:empty{display:none}
+  #qToggle{position:relative}
+  body.qopen #qSide{display:block;position:fixed;left:14px;top:76px;bottom:18px;width:290px;z-index:12;overflow-y:auto;overscroll-behavior:contain;padding:2px 2px 20px;scrollbar-width:thin}
+  body.qopen .gpane{margin-left:318px}
+  body.qopen #composer{left:calc(50% + 152px);width:min(840px,calc(100vw - 366px))}
+  #qSide #live{display:block !important;margin:0;background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+  #qSide #live>.head{pointer-events:none;padding:4px 6px}
+  #qSide #live>.head .chev{display:none}
+  #qSide #live>.body{display:block !important;padding:4px 4px 10px}
+  #qSide #live .preview{max-height:200px;object-fit:cover;border-radius:14px}
+  #qSide .qempty{color:var(--muted);font-size:13px;padding:6px}
+  #qSide #live.show ~ .qempty{display:none}
+}
 @media (min-width:1100px){
   body{padding:0 0 calc(var(--ch) + 28px)}
   .wrap{display:block;max-width:none}
@@ -704,6 +737,7 @@ body:not(.psheet) #composer .cmpref{display:none !important}
     <h1><span>Forge</span></h1>
     <div class="mtabs" id="mTabs"><button data-t="studio">Studio</button><button data-t="gal">Galerie</button></div>
     <div class="spacer"></div>
+    <button class="iconbtn glass" id="qToggle" aria-label="File d'attente" title="File d'attente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><b id="qToggleN"></b></button>
     <button class="iconbtn glass" id="cfgOpen" aria-label="Studio" title="Réglages de génération"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>
     <div class="pill glass"><span class="dot" id="syncDot"></span><span id="syncText">…</span></div>
     <button class="iconbtn glass" id="themeBtn" aria-label="Réglages">
@@ -712,6 +746,7 @@ body:not(.psheet) #composer .cmpref{display:none !important}
   </header>
 
   <div class="banner glass" id="banner"></div>
+  <aside id="qSide"><div class="qempty">Rien dans la file d'attente.</div></aside>
 
   <button class="rail glass" id="rail" title="Revenir au prompt (Échap)"><span>✎ Prompt</span></button>
   <div class="controls">
@@ -899,10 +934,18 @@ body:not(.psheet) #composer .cmpref{display:none !important}
 <div class="dock glass">
   <div class="dockinfo" id="dockInfo"></div>
   <div class="cmppop glass" id="cmpPop">
-    <div class="group-title">Format</div><div class="chips" id="pRatios"></div>
+    <div class="group-title">Format</div>
+    <div class="seg mini" id="segSize2" style="margin-bottom:8px"><button data-sz="light" title="≈ 0,75 MP · plus rapide">Rapide</button><button data-sz="native" title="≈ 1 MP · résolution native SDXL">SDXL</button></div>
+    <div class="chips" id="pRatios"></div>
+    <div class="row dims" style="margin-top:10px"><div><label class="lbl" for="width2">Largeur</label><input id="width2" data-key="width" type="number" inputmode="numeric" step="8" min="256" max="4096"></div><button class="btn cbtn" id="swap2" aria-label="Inverser" title="Inverser">⇄</button><div><label class="lbl" for="height2">Hauteur</label><input id="height2" data-key="height" type="number" inputmode="numeric" step="8" min="256" max="4096"></div></div>
     <div class="group-title">Steps · CFG</div>
     <div class="cgrid"><div><label class="lbl">Steps <b data-show="steps"></b></label><input type="range" data-key="steps" min="1" max="60" step="1"></div><div><label class="lbl">CFG <b data-show="cfg"></b></label><input type="range" data-key="cfg" min="1" max="12" step="0.5"></div></div>
     <div class="group-title">Nombre d'images</div><div class="seg" id="pCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button><button data-v="8">8</button></div>
+    <div class="group-title">Corrections</div>
+    <div class="cmsw"><div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="adetailer.enabled"><span></span></label><span>ADetailer · visage</span></div>
+    <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="adetailer.hands"><span></span></label><span>Mains</span></div>
+    <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="adetailer.body"><span></span></label><span>Corps entier</span></div>
+    <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="hires.enabled"><span></span></label><span>Hires fix</span></div></div>
   </div>
   <div class="cmppop glass" id="cmpLora">
     <div class="group-title">LoRAs actifs</div><div id="cmLoraList"></div>
@@ -1070,7 +1113,7 @@ document.documentElement.lang = LANG;
 const EN = {
   // en-tête, onglets, sections
   "Réglages": "Settings", "Galerie": "Gallery", "Modèle": "Model", "Négatif": "Negative", "Génération": "Generation",
-  "File d'attente": "Queue", "Couleurs": "Colors", "Coloration des tags": "Tag highlighting", "Persos": "Characters", "Poses": "Poses",
+  "Couleurs": "Colors", "Coloration des tags": "Tag highlighting", "Persos": "Characters", "Poses": "Poses",
   "Tenues": "Outfits", "Lieux": "Places", "Lumière": "Lighting", "Expressions": "Expressions", "Apparence": "Appearance",
   "Persos & LoRAs": "Characters & LoRAs", "Poses & cadrage": "Poses & framing", "Lieux & fonds": "Places & backgrounds",
   "Lumière & ambiance": "Lighting & mood", "Autres": "Other",
@@ -1140,7 +1183,7 @@ const EN = {
   "Image introuvable": "Image not found",
   // visionneuse
   "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
-  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "LoRAs actifs": "Active LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Steps · CFG": "Steps · CFG", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "LoRAs actifs": "Active LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Steps · CFG": "Steps · CFG", "Corrections": "Fixes", "Rien dans la file d'attente.": "Nothing in the queue.", "File d'attente": "Queue", "ADetailer · visage": "ADetailer · face", "Mains": "Hands", "Corps entier": "Whole body", "Hires fix": "Hires fix", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
   "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
   "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
   "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
@@ -1812,6 +1855,7 @@ function goLabel() {
   go.classList.toggle("adding", !!busy && !paused); go.dataset.n = busy ? (Q.pending.length + (Q.running ? 1 : 0)) : "";
   go.textContent = paused ? `▶ Reprendre la file · ${Q.pending.length}` : busy ? (n > 1 ? `Ajouter ${n} images à la file` : "Ajouter à la file") : (n > 1 ? `Générer ${n} images` : "Générer");
   go.title = go.textContent;
+  const qn = $("#qToggleN"); if (qn) qn.textContent = busy ? (Q.pending.length + (Q.running ? 1 : 0)) : "";
   $("#qAddBtn").classList.toggle("show", paused);
   $("#qPauseBtn").classList.toggle("show", !!(Q && !Q.paused && Q.running && Q.pending.length));
 }
@@ -1905,7 +1949,7 @@ function sizeClass() {
 }
 function renderRatios() {
   const sz = sizeClass(), list = sz === "light" ? RATIOS_LIGHT : RATIOS_NATIVE, box = $("#ratios");
-  $$("#segSize button").forEach(b => b.classList.toggle("on", b.dataset.sz === sz));
+  $$("#segSize button, #segSize2 button").forEach(b => b.classList.toggle("on", b.dataset.sz === sz));
   box.textContent = "";
   for (const label of RATIO_ORDER) {
     const r = list.find(x => x[0] === label); if (!r) continue;
@@ -1917,14 +1961,14 @@ function renderRatios() {
   }
 }
 function bindSize() {
-  $$("#segSize button").forEach(b => b.onclick = () => {
+  $$("#segSize button, #segSize2 button").forEach(b => b.onclick = () => {
     const from = sizeClass(), to = b.dataset.sz; try { localStorage.setItem(SZKEY, to); } catch (e) {}
     if (from !== to) {  // même ratio dans l'autre taille
       const cur = (from === "light" ? RATIOS_LIGHT : RATIOS_NATIVE).find(r => r[1] === +S.width && r[2] === +S.height);
       const nxt = cur && (to === "light" ? RATIOS_LIGHT : RATIOS_NATIVE).find(r => r[0] === cur[0]);
       if (nxt) { S.width = nxt[1]; S.height = nxt[2]; render(); changed(); }
     }
-    renderRatios();
+    renderRatios(); renderPill();
   });
 }
 
@@ -3340,7 +3384,7 @@ function bind() {
     el.addEventListener(ev, () => { setPath(S, el.dataset.key, readInput(el)); if (el.type === "range") paintRange(el); changed(); });
   }
   bindSize();
-  $("#swap").onclick = () => { [S.width, S.height] = [S.height, S.width]; render(); changed(); };
+  $("#swap").onclick = $("#swap2").onclick = () => { [S.width, S.height] = [S.height, S.width]; render(); changed(); };
   $("#seedRandom").onclick = () => { S.seed = -1; render(); changed(); };
   $("#bMinus").onclick = () => { S.batch_count = Math.max(1, (+S.batch_count || 1) - 1); changed(); };
   $("#bPlus").onclick = () => { S.batch_count = Math.min(50, (+S.batch_count || 1) + 1); changed(); };
@@ -3383,6 +3427,17 @@ async function init() {
   const isField = el => el && (el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && !/^(checkbox|radio|range|button|submit|file|color)$/.test(el.type)));
   document.addEventListener("focusin", e => { if (isField(e.target)) document.body.classList.add("typing"); });
   document.addEventListener("focusout", () => setTimeout(() => { if (!isField(document.activeElement)) document.body.classList.remove("typing"); }, 120));
+  // desktop : la file d'attente vit dans une barre latérale à gauche (dans le sheet Studio sur mobile)
+  {
+    const live = $("#live"), side = $("#qSide"), home = live.nextElementSibling, mqd = matchMedia("(min-width:1100px)");
+    let open = true; try { open = localStorage.getItem("forgeMobileQ") !== "0"; } catch (e) {}
+    const apply = () => {
+      if (mqd.matches) { if (live.parentElement !== side) side.prepend(live); document.body.classList.toggle("qopen", open); }
+      else { if (live.parentElement === side) (home ? home.before(live) : $(".controls").appendChild(live)); document.body.classList.remove("qopen"); }
+    };
+    mqd.addEventListener("change", apply); apply();
+    $("#qToggle").onclick = () => { open = !open; try { localStorage.setItem("forgeMobileQ", open ? "1" : "0"); } catch (e) {} apply(); };
+  }
   // mobile : compositeur en bas (prompt compact -> fenêtre de saisie au focus, galerie au-dessus) + réglages dans le sheet Studio
   {
     const sec = $("section[data-sec=prompt]"), root = document.documentElement.style, vv = window.visualViewport;
