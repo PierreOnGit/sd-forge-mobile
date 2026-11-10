@@ -656,6 +656,9 @@ section.cfg{padding:6px 6px 14px}
 
 /* ===== desktop : style « Flow » — galerie plein écran, bloc de saisie flottant centré, Studio en panneau latéral ===== */
 .cmpref{display:none}
+#hoverPrev{position:fixed;z-index:60;display:none;pointer-events:none;border-radius:18px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,.6);border:1px solid var(--stroke);background:#000}
+#hoverPrev.show{display:block;animation:fade .15s}
+#hoverPrev img{display:block;max-width:min(560px,56vw);max-height:78vh;object-fit:contain}
 body:has(#viewer.show) #composer,body:has(#photo.show) #composer,body:has(.sheet.show) #composer{display:none !important}
 #composer .cmpref:not([hidden]){display:block;position:relative;width:76px;height:76px;margin:0 0 8px;flex:none}
 body:not(.psheet) #composer .cmpref{display:none !important}
@@ -2135,6 +2138,27 @@ async function generate() {
   try { await enqueue([{ payload: payloadFor(S, n), label: jobLabel(S) }]); toast(busy ? "Ajouté à la file" : "Génération lancée"); }
   catch (e) { toast("Erreur : " + e.message, true); if (e.status === 404) noApi(); }
 }
+function bindHoverPrev() {
+  if (!matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+  const box = document.createElement("div"); box.id = "hoverPrev"; const im = document.createElement("img"); im.alt = ""; box.appendChild(im); document.body.appendChild(box);
+  let cur = null, tm = null;
+  const srcOf = el => el.tagName === "IMG" ? el.currentSrc || el.src : ((el.querySelector("img") || {}).currentSrc || (el.querySelector("img") || {}).src || "");
+  const sync = () => { if (!cur) return; const u = srcOf(cur); if (u && im.src !== u) im.src = u; };
+  const place = el => {
+    const r = el.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
+    box.style.top = box.style.bottom = box.style.left = "";
+    if (r.left < 260 && r.top < vh / 2) { box.style.left = Math.round(r.right + 14) + "px"; box.style.top = Math.max(12, Math.round(r.top)) + "px"; }
+    else { box.style.left = Math.max(12, Math.min(Math.round(r.left), vw - 580)) + "px"; box.style.bottom = Math.round(vh - r.top + 12) + "px"; }
+  };
+  const hide = () => { cur = null; clearInterval(tm); box.classList.remove("show"); };
+  document.addEventListener("mouseover", e => {
+    const el = e.target.closest && e.target.closest(".dthumb.show, #preview");
+    if (!el || el === cur) return;
+    cur = el; sync(); if (!im.src) { cur = null; return; }
+    place(el); box.classList.add("show"); clearInterval(tm); tm = setInterval(sync, 400);
+  });
+  document.addEventListener("mouseout", e => { if (cur && !(e.relatedTarget && cur.contains(e.relatedTarget))) hide(); });
+}
 function bindVariation() {
   const KEY = "forgeMobileVar", cfg = { d: 0.5, n: 1 };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
@@ -3448,7 +3472,7 @@ function bind() {
 }
 
 async function init() {
-  buildThemeSheet(); applyTheme(); setupSections(); renderRatios(); bind(); bindGallery(); bindAutocomplete(); bindSettings(); guardRanges(); bindImport(); bindNow(); bindTabs(); bindHighlight(); bindDock(); bindCivitai(); bindWide(); bindPhoto(); bindTipo(); bindVariation();
+  buildThemeSheet(); applyTheme(); setupSections(); renderRatios(); bind(); bindGallery(); bindAutocomplete(); bindSettings(); guardRanges(); bindImport(); bindNow(); bindTabs(); bindHighlight(); bindDock(); bindCivitai(); bindWide(); bindPhoto(); bindTipo(); bindVariation(); bindHoverPrev();
   $$("#adFaces button").forEach(b => b.onclick = () => { S.adetailer = { ...(S.adetailer || {}), faces: +b.dataset.v }; renderAd(); changed(); });
   $$("#segLang button").forEach(b => { b.classList.toggle("on", b.dataset.v === LANG_PREF); b.onclick = () => { try { localStorage.setItem(LANGKEY, b.dataset.v); } catch (e) {} location.reload(); }; });
   startI18n();
