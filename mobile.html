@@ -344,6 +344,9 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   body.psheet #composer .cmpshut{display:grid}
   #composer>.ac{position:absolute;left:12px;right:12px;top:auto;bottom:calc(100% + 8px);margin:0;max-height:34vh;z-index:6}
   #composer .cmpshut svg{width:18px;height:18px}
+  #composer .cmpshut.cmpbig{right:60px}
+  body.psheet #composer .cmpshut.cmpbig{display:grid}
+  body.pbig #composer .hl textarea#prompt{min-height:36vh;max-height:44vh}
   /* rangée d'actions */
   #composer .dock.glass{position:static;left:auto;right:auto;bottom:auto;max-width:none;width:auto;margin:0;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;transform:none !important;opacity:1 !important;pointer-events:auto !important}
   #composer .dockinfo{text-align:left;margin:0 0 6px 2px}
@@ -735,6 +738,10 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
   body.psheet #composer{width:min(960px,calc(100vw - 64px))}
   body.qopen.psheet #composer{width:min(960px,calc(100vw - 500px))}
   #composer .cmpshut{top:12px;right:14px}
+  #composer .cmpshut.cmpbig{right:56px}
+  body.pbig #composer .hl textarea#prompt{min-height:58vh;max-height:72vh}
+  body.pbig #composer section[data-sec=prompt]>.body{max-height:calc(100vh - 150px)}
+  body.pbig.psheet #composer{bottom:14px}
   #composer>.ac{left:20px;right:20px}
   body.cfgopen{overflow:auto}
   body.cfgopen .controls{inset:0 0 0 auto;width:min(580px,100vw);border-left:1px solid var(--stroke);box-shadow:-24px 0 70px rgba(0,0,0,.5);animation:fade .2s}
@@ -794,6 +801,7 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
         <div class="acwrap hl neg"><pre class="hlb" id="negativeHl" aria-hidden="true"></pre><textarea id="negative" data-key="negative" data-ac placeholder="lowres, worst quality, …" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea></div>
       </details>
       <div class="ac" id="ac"></div>
+      <button class="cmpshut cmpbig" id="cmpBig" aria-label="Agrandir le prompt" title="Agrandir / réduire la zone de prompt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button>
       <button class="cmpshut" id="cmpShut" aria-label="Réduire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     </div>
   </section>
@@ -1200,7 +1208,7 @@ const EN = {
   "Image introuvable": "Image not found",
   // visionneuse
   "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
-  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "LoRAs actifs": "Active LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Steps · CFG": "Steps · CFG", "Corrections": "Fixes", "Consigne perso (optionnel)": "Custom instruction (optional)", "Rien dans la file d'attente.": "Nothing in the queue.", "File d'attente": "Queue", "ADetailer · visage": "ADetailer · face", "Mains": "Hands", "Corps entier": "Whole body", "Hires fix": "Hires fix", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "LoRAs actifs": "Active LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Steps · CFG": "Steps · CFG", "Corrections": "Fixes", "Agrandir le prompt": "Enlarge prompt", "Agrandir / réduire la zone de prompt": "Enlarge / shrink the prompt area", "Consigne perso (optionnel)": "Custom instruction (optional)", "Rien dans la file d'attente.": "Nothing in the queue.", "File d'attente": "Queue", "ADetailer · visage": "ADetailer · face", "Mains": "Hands", "Corps entier": "Whole body", "Hires fix": "Hires fix", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
   "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
   "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
   "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
@@ -3487,6 +3495,8 @@ async function init() {
     const close = () => { document.body.classList.remove("psheet"); if (isField(document.activeElement)) document.activeElement.blur(); };
     document.addEventListener("focusin", e => { if (e.target.id === "prompt" || e.target.id === "negative") open(); });
     $("#cmpShut").onclick = close;
+    try { if (localStorage.getItem("forgeMobileBig") === "1") document.body.classList.add("pbig"); } catch (e) {}
+    $("#cmpBig").onclick = () => { const on = document.body.classList.toggle("pbig"); try { localStorage.setItem("forgeMobileBig", on ? "1" : "0"); } catch (e) {} $("#prompt").focus(); };
     $("#cmpRefX").onclick = () => { $("#cmpRef").hidden = true; };
     // taper ailleurs (ou faire défiler la galerie) referme le clavier et le menu format
     document.addEventListener("pointerdown", e => {
