@@ -1571,6 +1571,18 @@ def _tipo_load():
 
 
 def _tipo_suggest(prompt, describe="", length="short", seed=0):
+    try:
+        r = _tipo_suggest_inner(prompt, describe, length, seed)
+        _log(f"TIPO : {len(r['suggestions'])} suggestions en {r['seconds']} s")
+        return r
+    except HTTPException:
+        raise
+    except Exception as e:
+        _log("TIPO : erreur pendant la suggestion\n" + traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"TIPO a échoué ({type(e).__name__}) : {str(e)[:160]}")
+
+
+def _tipo_suggest_inner(prompt, describe="", length="short", seed=0):
     import random as _random
 
     if not _tipo_available():
