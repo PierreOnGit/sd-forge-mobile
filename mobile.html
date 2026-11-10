@@ -315,7 +315,12 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .cmlr input[type=range]{grid-column:1/-1}
 .cmres{max-height:200px;overflow:auto;margin-top:6px;border-radius:12px}
 .cmres div{padding:9px 10px;border-radius:10px;font-size:13.5px;cursor:pointer}.cmres div:hover{background:var(--field)}.cmres small{color:var(--muted);margin-left:6px}
-#cmpLora input[type=search]{width:100%;margin-top:2px}
+#cmpLora.show{display:flex !important;flex-direction:column;max-height:min(70vh,calc(100vh - var(--ch) - 40px));overflow:hidden;box-sizing:border-box;max-width:calc(100vw - 24px)}
+#cmpLora .group-title,#cmpLora input[type=search]{flex:none}
+#cmLoraList{flex:0 1 auto;min-height:0;max-height:38vh;overflow-y:auto;overflow-x:hidden;padding-right:4px;margin-bottom:6px}
+#cmpLora .cmres{flex:1 1 auto;min-height:90px;max-height:none;overflow-y:auto}
+#cmpLora .cmlr{min-width:0}#cmpLora .cmlr>*{min-width:0}
+#cmpLora input[type=search]{width:100%;margin-top:2px;box-sizing:border-box}
 @media (min-width:0px){
   .mtabs,.rail,#gJump,#cfgOpen{display:none !important}
   body{padding-bottom:calc(var(--ch) + 12px)}
