@@ -175,7 +175,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 @media (max-width:700px){.gbar{flex-wrap:wrap}.gbar input#gq{flex:1 0 100%}.gbar .gzoom{margin-right:auto}}
 .rail{display:none}
 .mtabs{display:none}
-@media (max-width:1099px){
+@media (min-width:0px){
   .mtabs{display:flex;background:var(--field);border:1px solid var(--field-stroke);border-radius:14px;padding:3px;gap:2px;margin-left:4px}
   .mtabs button{border:0;background:none;color:var(--muted);font-weight:650;font-size:13.5px;padding:7px 12px;border-radius:11px;cursor:pointer}
   .mtabs button.on{background:var(--glass-strong);color:var(--text);box-shadow:inset 0 1px 0 var(--hi)}
@@ -209,7 +209,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .gscroll{max-height:64vh;overflow-y:auto;overscroll-behavior:contain;border-radius:14px;scrollbar-width:thin;padding-right:2px}
 @media (min-width:1100px){.gscroll{max-height:calc(100vh - 330px);min-height:420px}body.gwide .gscroll{max-height:calc(100vh - 250px)}}
 /* mobile : la galerie ne pilote plus son propre scroll (sinon elle piège le doigt), c'est la page qui défile */
-@media (max-width:1099px){
+@media (min-width:0px){
   .gscroll{max-height:none;overflow:visible;overscroll-behavior:auto;padding-right:0}
   .gallery{touch-action:pan-y}
   .tile{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
@@ -280,7 +280,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 
 /* dock flottant */
 .dock{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;max-width:640px;margin:0 auto;padding:10px;border-radius:30px;transition:transform .25s,opacity .2s}
-@media (max-width:1099px){ body.typing .dock{transform:translateY(140%);opacity:0;pointer-events:none} }
+@media (min-width:0px){ body.typing .dock{transform:translateY(140%);opacity:0;pointer-events:none} }
 .dockinfo{font-size:12px;color:var(--muted);text-align:center;margin:-2px 0 8px;display:none}
 .dockinfo.show{display:block}
 .dockrow{display:flex;gap:8px;align-items:center}
@@ -298,7 +298,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 /* mobile : galerie en grandes tuiles, bloc de saisie unique en bas (prompt + « + » + format/nombre + envoyer), réglages derrière « + » */
 :root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px);--ch:150px}
 .cfgbar,#cfgOpen,.cmpplus,.cmppill,.cmpsp,.cmpshut,.cmppop{display:none}
-@media (max-width:1099px){
+@media (min-width:0px){
   .mtabs,.rail,#gJump,#cfgOpen{display:none !important}
   body{padding-bottom:calc(var(--ch) + 12px)}
   .controls{display:none}
@@ -626,6 +626,49 @@ section.cfg{padding:6px 6px 14px}
 .checks label{display:flex;align-items:center;gap:6px;cursor:pointer}
 .checks input{width:18px;height:18px;accent-color:var(--accent)}
 .sheet h3.st{font-size:15px;margin:22px 2px 4px}
+
+/* ===== desktop : style « Flow » — galerie plein écran, bloc de saisie flottant centré, Studio en panneau latéral ===== */
+.cmpref{display:none}
+#composer .cmpref:not([hidden]){display:block;position:relative;width:76px;height:76px;margin:0 0 8px;flex:none}
+body:not(.psheet) #composer .cmpref{display:none !important}
+.cmpref img{width:100%;height:100%;object-fit:cover;border-radius:14px;display:block}
+.cmpref button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:1px solid var(--stroke);background:var(--pop);color:var(--text);font-size:11px;cursor:pointer;line-height:1}
+.tile .tact,.tile .cap{display:none}
+@media (min-width:1100px){
+  body{padding:0 0 calc(var(--ch) + 28px)}
+  .wrap{display:block;max-width:none}
+  header{position:sticky;top:0;z-index:9;padding:16px 32px 10px;margin:0;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .grip{display:none !important}
+  body.gwide .gbar,body.gwide .gactive,body.gwide .gpanel,body.gwide .selbar,body.gwide .pager{margin-left:32px;margin-right:32px}
+  body.gwide .gbar{flex-wrap:nowrap;max-width:none}
+  body.gwide .gbar input#gq{flex:1 1 auto;max-width:640px;margin:0 auto}
+  body.gwide .gscroll{max-height:none;overflow:visible}
+  body.gwide .gallery{display:flex;flex-wrap:wrap;gap:8px;margin:0 32px}
+  body.gwide .gallery .tile{aspect-ratio:var(--ar);flex:var(--ar) 1 calc(var(--ar) * var(--rowh));border-radius:18px}
+  body.gwide .gallery[data-size="s"]{grid-template-columns:none}
+  body.gwide .gallery .gfill{display:block}
+  body.gwide .gday{margin:20px 4px 6px;font-size:17px}
+  body.gwide .tile .badge{display:none}
+  body.gwide .tile .cap{display:block;position:absolute;left:0;right:0;bottom:0;padding:26px 12px 10px;font-size:12.5px;line-height:1.3;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.62));opacity:0;transition:opacity .15s;pointer-events:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  body.gwide .tile .tact{display:flex;position:absolute;top:8px;left:8px;gap:6px;opacity:0;transition:opacity .15s}
+  body.gwide .tile:hover .cap,body.gwide .tile:hover .tact{opacity:1}
+  .tile .tact button{width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:16px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .tile .tact button:hover{background:rgba(var(--accent-rgb),.85)}
+  .tile .star{right:10px;top:8px}
+  #composer{left:50%;right:auto;transform:translateX(-50%);width:min(840px,calc(100vw - 64px));max-width:none;margin:0;bottom:22px;border:1px solid var(--stroke);border-radius:30px;padding:16px 20px 14px;box-shadow:0 18px 60px rgba(0,0,0,.5)}
+  body.typing:not(.psheet) #composer{display:flex}
+  body.typing .dock{transform:none;opacity:1;pointer-events:auto}
+  #composer .hl textarea,#composer .hl .hlb{font-size:16px}
+  body.psheet #composer .hl textarea#prompt{min-height:140px;max-height:34vh}
+  body.psheet #composer section[data-sec=prompt]>.body{max-height:min(56vh,calc(100vh - 200px))}
+  #composer .cmpshut{top:12px;right:14px}
+  #composer>.ac{left:20px;right:20px}
+  body.cfgopen{overflow:auto}
+  body.cfgopen .controls{inset:0 0 0 auto;width:min(580px,100vw);border-left:1px solid var(--stroke);box-shadow:-24px 0 70px rgba(0,0,0,.5);animation:fade .2s}
+  .controls .preview{display:none !important}
+  .nowcard.show{display:grid;margin:0 32px 10px}
+  #cfgOpen{display:grid !important}
+}
 </style>
 </head>
 <body>
@@ -652,6 +695,7 @@ section.cfg{padding:6px 6px 14px}
   <section class="card glass studio" data-sec="prompt">
     <div class="head"><h2>Prompt</h2><div class="legend" id="hlLegend"></div><span class="hint" id="promptHint"></span><button class="hltog" id="hlToggle" title="Coloration des tags">Couleurs</button><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg></div>
     <div class="body">
+      <div class="cmpref" id="cmpRef" hidden><img id="cmpRefImg" alt="" title="Prompt repris de cette image"><button type="button" id="cmpRefX" aria-label="Retirer">✕</button></div>
       <div class="acwrap hl"><pre class="hlb" id="promptHl" aria-hidden="true"></pre><textarea id="prompt" data-key="prompt" data-ac placeholder="masterpiece, best quality, 1girl, …" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea></div>
       <div class="pcheck" id="pCheck"></div>
       <div class="tipo" id="tipo">
@@ -1064,7 +1108,7 @@ const EN = {
   "Image introuvable": "Image not found",
   // visionneuse
   "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
-  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
   "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
   "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
   "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
@@ -1414,7 +1458,7 @@ function bindHighlight() {
 /* ===================== galerie agrandie / raccourcis ===================== */
 const WKEY = "forgeMobileWide";
 function setWide(on) {
-  const forced = matchMedia("(max-width:1099px)").matches;  // mobile : la galerie est toujours l'écran principal
+  const forced = matchMedia("(min-width:0px)").matches;  // mobile : la galerie est toujours l'écran principal
   if (forced) on = true;
   document.body.classList.toggle("gwide", on);
   renderMTabs();
@@ -1630,7 +1674,7 @@ function placeDock(x, y) {
 }
 function bindDock() {
   const grip = $("#dockGrip"), d = $(".dock");
-  try { const p = JSON.parse(localStorage.getItem(DKEY) || "null"); if (p && innerWidth >= 1100) placeDock(p[0], p[1]); } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem(DKEY) || "null"); if (p && false) placeDock(p[0], p[1]); } catch (e) {}
   let start = null;
   grip.addEventListener("pointerdown", e => {
     const r = d.getBoundingClientRect(); start = { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -2239,6 +2283,12 @@ function tileFor(it, i) {
   t.appendChild(img);
   if (it.fav) { const s = document.createElement("span"); s.className = "star"; s.textContent = "★"; t.appendChild(s); }
   if (it.loras && it.loras.length) { const b = document.createElement("span"); b.className = "badge"; b.textContent = it.loras.map(l => l.name).join(" · "); t.appendChild(b); }
+  if (it.prompt) { const c = document.createElement("span"); c.className = "cap"; c.textContent = stripLoras(it.prompt).slice(0, 90); t.appendChild(c); }
+  const ac = document.createElement("div"); ac.className = "tact";
+  const mk = (cls, txt, title, fn) => { const b = document.createElement("button"); b.className = cls; b.textContent = txt; b.title = title; b.setAttribute("aria-label", title); b.onclick = e => { e.stopPropagation(); fn(); }; ac.appendChild(b); };
+  mk("fv", it.fav ? "♥" : "♡", "Favori", () => favItem(it, t));
+  mk("ru", "↩", "Réutiliser le prompt", () => reuse(false, it));
+  t.appendChild(ac);
   if (selected.has(it.path)) t.classList.add("sel");
   t.onclick = () => selecting ? toggleSel(t, it.path) : openViewer(i);
   return t;
@@ -2552,8 +2602,8 @@ function copyText(text, msg) {
 function stripLoras(p) {
   return p.replace(/<lora:[^>]+>/gi, "").replace(/\s*,\s*(,\s*)+/g, ", ").replace(/^[\s,]+|[\s,]+$/g, "");
 }
-function reuse(all) {
-  const it = vItem(); if (!it || !it.prompt) { toast("Pas de prompt dans cette image", true); return; }
+function reuse(all, item) {
+  const it = item || vItem(); if (!it || !it.prompt) { toast("Pas de prompt dans cette image", true); return; }
   // les LoRAs du prompt passent dans la liste (avec leurs poids), les autres sont désactivés
   const used = (it.loras || []).map(l => ({ name: l.name, weight: parseFloat(l.weight) || 1, enabled: true }));
   const others = (S.loras || []).filter(l => !used.some(u => u.name === l.name)).map(l => ({ ...l, enabled: false }));
@@ -2567,8 +2617,20 @@ function reuse(all) {
     if (it.seed) S.seed = +it.seed;
   }
   render(); changed(); closeViewer(); toast(all ? "Prompt, LoRAs et réglages repris" : "Prompt et LoRAs repris");
-  setWide(false);
-  if (window.innerWidth >= 1100) window.scrollTo({ top: 0, behavior: "smooth" });
+  showRef(it);
+  if (innerWidth >= 1100) setTimeout(() => $("#prompt").focus(), 60);
+}
+function showRef(it) {
+  const r = $("#cmpRef"); if (!r) return;
+  $("#cmpRefImg").src = "/mobile/api/thumb?path=" + encodeURIComponent(it.path); r.hidden = false;
+}
+async function favItem(it, t) {
+  try {
+    const r = await api("/mobile/api/fav", { method: "POST", body: JSON.stringify({ path: it.path, fav: !it.fav }) });
+    it.fav = r.fav; gSig = ""; t.classList.toggle("isfav", !!it.fav);
+    const b = t.querySelector(".tact .fv"); if (b) b.textContent = it.fav ? "♥" : "♡";
+    let st = t.querySelector(".star"); if (it.fav && !st) { st = document.createElement("span"); st.className = "star"; st.textContent = "★"; t.appendChild(st); } else if (!it.fav && st) st.remove();
+  } catch (e) { toast("Favori impossible", true); }
 }
 function bindGallery() {
   let qt = null;
@@ -2775,7 +2837,7 @@ function acShow(ta, tok, tags) {
   const now = acToken(ta);  // le texte a pu bouger pendant la requête
   if (!tags.length || !now || now.text !== tok.text || now.start !== tok.start) { acHide(); return; }
   acEl = ta; acTok = tok; acItems = tags; acSel = 0; acNav = false;
-  const cmp = $("#composer"), inCmp = !!(cmp && cmp.contains(ta) && matchMedia("(max-width:1099px)").matches), host = inCmp ? cmp : ta.parentElement;
+  const cmp = $("#composer"), inCmp = !!(cmp && cmp.contains(ta) && matchMedia("(min-width:0px)").matches), host = inCmp ? cmp : ta.parentElement;
   if (box.parentElement !== host) host.appendChild(box);
   box.textContent = "";
   tags.forEach((t, i) => {
@@ -3258,7 +3320,7 @@ async function init() {
   // mobile : compositeur en bas (prompt compact -> fenêtre de saisie au focus, galerie au-dessus) + réglages dans le sheet Studio
   {
     const sec = $("section[data-sec=prompt]"), root = document.documentElement.style, vv = window.visualViewport;
-    const mq = matchMedia("(max-width:1099px)");
+    const mq = matchMedia("(min-width:0px)");
     const syncKb = () => {
       const h = vv ? vv.height : innerHeight, kb = vv ? Math.max(0, innerHeight - vv.height - vv.offsetTop) : 0;
       root.setProperty("--kb", kb + "px"); root.setProperty("--vvh", h + "px");
@@ -3285,6 +3347,7 @@ async function init() {
     const close = () => { document.body.classList.remove("psheet"); if (isField(document.activeElement)) document.activeElement.blur(); };
     document.addEventListener("focusin", e => { if (e.target.id === "prompt" || e.target.id === "negative") open(); });
     $("#cmpShut").onclick = close;
+    $("#cmpRefX").onclick = () => { $("#cmpRef").hidden = true; };
     // taper ailleurs (ou faire défiler la galerie) referme le clavier et le menu format
     document.addEventListener("pointerdown", e => {
       if (!mq.matches) return;
