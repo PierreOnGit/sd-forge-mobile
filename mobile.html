@@ -680,15 +680,28 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
   #qToggle b{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}
   #qToggle b:empty{display:none}
   #qToggle{position:relative}
-  body.qopen #qSide{display:block;position:fixed;left:14px;top:76px;bottom:18px;width:290px;z-index:12;overflow-y:auto;overscroll-behavior:contain;padding:2px 2px 20px;scrollbar-width:thin}
-  body.qopen .gpane{margin-left:318px}
-  body.qopen #composer{left:calc(50% + 152px);width:min(840px,calc(100vw - 366px))}
+  body.qopen #qSide{display:block;position:fixed;left:10px;top:70px;bottom:18px;width:216px;z-index:12;overflow-y:auto;overscroll-behavior:contain;padding:2px 2px 20px;scrollbar-width:thin}
+  body.qopen .gpane{margin-left:236px}
+  body.qopen #composer{width:min(840px,calc(100vw - 500px))}
   #qSide #live{display:block !important;margin:0;background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
   #qSide #live>.head{pointer-events:none;padding:4px 6px}
   #qSide #live>.head .chev{display:none}
   #qSide #live>.body{display:block !important;padding:4px 4px 10px}
   #qSide #live .preview{max-height:200px;object-fit:cover;border-radius:14px}
-  #qSide .qempty{color:var(--muted);font-size:13px;padding:6px}
+  #qSide .qempty{color:var(--muted);font-size:12.5px;padding:4px 8px}
+  #qSide #live>.head h2{font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  #qSide #live>.head{padding:2px 8px 4px}
+  #qSide .qrow{padding:5px 4px 5px 8px;font-size:12.5px;border-radius:9px;background:transparent;border:0;margin-top:1px;gap:3px}
+  #qSide .qrow:hover{background:var(--field)}
+  #qSide .qrow .qs{font-size:11px}
+  #qSide .qrow .qb{font-size:13px;padding:2px 5px}
+  #qSide .qlabel{font-size:12.5px;font-weight:600;margin:2px 8px 4px}
+  #qSide .group-title{font-size:10.5px;margin:10px 8px 2px}
+  #qSide .bar{margin:0 8px}
+  #qSide #liveText,#qSide #qRun .muted{font-size:11.5px;margin:3px 8px}
+  #qSide #live .preview{max-height:130px;margin:6px 8px 0;width:calc(100% - 16px)}
+  #qSide .btnrow{gap:4px;padding:0 4px;flex-wrap:wrap}
+  #qSide .btnrow .btn{padding:5px 9px;font-size:11.5px;height:auto;border-radius:99px;background:transparent}
   #qSide #live.show ~ .qempty{display:none}
 }
 @media (min-width:1100px){
@@ -720,7 +733,7 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
   #composer{background:color-mix(in srgb,var(--bg) 94%,transparent)}
   body.psheet #composer section[data-sec=prompt]>.body{max-height:min(78vh,calc(100vh - 150px))}
   body.psheet #composer{width:min(960px,calc(100vw - 64px))}
-  body.qopen.psheet #composer{width:min(960px,calc(100vw - 366px))}
+  body.qopen.psheet #composer{width:min(960px,calc(100vw - 500px))}
   #composer .cmpshut{top:12px;right:14px}
   #composer>.ac{left:20px;right:20px}
   body.cfgopen{overflow:auto}
