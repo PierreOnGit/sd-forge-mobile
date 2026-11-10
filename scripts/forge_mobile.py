@@ -618,13 +618,31 @@ def _ai_enhance(prompt, mode, extra):
     extra_rules = str(s.get("ai_extra") or "").strip()
     if extra_rules:
         system += "\nAdditional instructions from the user (follow them): " + extra_rules[:600]
-    body = json.dumps({"model": model, "temperature": 0.4, "max_tokens": 3000,
-                       "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}).encode()
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
+    def _call(think_off, max_tokens):
+        payload = {"model": model, "temperature": 0.4, "max_tokens": max_tokens,
+                   "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}
+        if think_off and prov == "deepseek":
+            payload["thinking"] = {"type": "disabled"}  # modèles « réflexion » : on veut juste la réponse
+        req = urllib.request.Request(url, data=json.dumps(payload).encode(),
+                                     headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return json.loads(r.read().decode("utf-8", "replace"))
+
     t0 = time.time()
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
-            data = json.loads(r.read().decode("utf-8", "replace"))
+        try:
+            data = _call(True, 3000)
+        except urllib.error.HTTPError as e:
+            if e.code != 400 or prov != "deepseek":
+                raise
+            _log("ai enhance: deepseek refuse « thinking », nouvel essai sans")
+            data = _call(False, 8000)
+        try:
+            if not (data["choices"][0]["message"].get("content") or "").strip() and data["choices"][0].get("finish_reason") == "length":
+                _log("ai enhance: réponse tronquée par la réflexion, nouvel essai avec plus de marge")
+                data = _call(True, 12000)
+        except Exception:
+            pass
     except urllib.error.HTTPError as e:
         code = e.code
         msg = {401: "clé API refusée", 402: "solde insuffisant", 404: "modèle introuvable", 429: "trop de requêtes"}.get(code, f"erreur HTTP {code}")
