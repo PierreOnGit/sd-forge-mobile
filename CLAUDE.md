@@ -44,6 +44,8 @@ Runtime files written next to the extension (all git-ignored): `shared_state.jso
 - Desktop: wide gallery mode, draggable floating dock with magnet (Generate / Resume / Pause), paginated gallery with internal scroll.
 - Mobile (<1100 px): gallery is the main screen (`body.gwide` forced, 2-column rounded tiles). The prompt section + dock are moved by JS into a fixed bottom `#composer` (compact prompt → expands on focus as `body.psheet`, with « + » = Studio sheet `body.cfgopen`, format/count pill `#cmpPill`, round send button). Every other setting lives in the Studio sheet (`.controls`). Photo mode: swipe, pinch & double-tap zoom, swipe-down close, `history.pushState` so Android back closes it. Wide viewer (≥1100 px): tapping the image opens photo mode (`forcePhoto`).
 - **Variation** = img2img job (`payload.init_path`, resolved server-side through `_safe_image`); **ADetailer** = optional conservative preset (`state.adetailer`), dropped automatically if Forge answers 422.
+- **AI improver** (🪄 Améliorer, in the TIPO row): `/mobile/api/ai/enhance` calls DeepSeek or Grok (OpenAI-compatible chat completions); provider/model/key in ⚙️, key stored in `settings.json` (exposed only as `ai_key_set`). Only the prompt is sent; never log it. Result replaces the prompt with an Undo toast.
+- Mobile autosuggestions `#ac` float above `#composer` (no layout shift); the send button shows a "+" with a pending count while a generation runs.
 - Prompt editor: colored overlay (`hlRender`), autocomplete (Enter/Tab pick), prompt checker, tag library built from image metadata.
 
 ## Dev & test workflow

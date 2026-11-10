@@ -324,6 +324,7 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   body.psheet #composer section[data-sec=prompt]>.body{max-height:min(54vh,calc(var(--vvh) - 150px))}
   #composer .cmpshut{position:absolute;top:-17px;right:18px;width:34px;height:34px;border-radius:50%;border:1px solid var(--stroke);background:var(--pop);color:var(--text);place-items:center;cursor:pointer;padding:0}
   body.psheet #composer .cmpshut{display:grid}
+  #composer>.ac{position:absolute;left:12px;right:12px;top:auto;bottom:calc(100% + 8px);margin:0;max-height:34vh;z-index:6}
   #composer .cmpshut svg{width:18px;height:18px}
   /* rangée d'actions */
   #composer .dock.glass{position:static;left:auto;right:auto;bottom:auto;max-width:none;width:auto;margin:0;padding:0;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0;transform:none !important;opacity:1 !important;pointer-events:auto !important}
@@ -338,6 +339,9 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
   #composer .cmpsp{display:block;order:4;flex:1}
   #composer .dock .go{order:9;flex:none;width:52px;height:52px;padding:0;border-radius:50%;font-size:0;line-height:0;display:grid;place-items:center}
   #composer .dock .go::before{content:"";width:22px;height:22px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat}
+  #composer .dock .go{position:relative}
+  #composer .dock .go.adding::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E")}
+  #composer .dock .go.adding::after{content:attr(data-n);position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--text);color:var(--bg);font-size:12px;font-weight:700;line-height:20px;text-align:center}
   #composer .dock .go.resume::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z'/%3E%3C/svg%3E");width:18px;height:18px}
   #composer .cmppop.show{display:block;position:absolute;left:12px;right:12px;bottom:calc(100% + 10px);padding:14px;border-radius:22px;z-index:5;background:linear-gradient(var(--pop),var(--pop)),var(--bg)}
   .cmppop .group-title{margin:0 0 8px}
@@ -654,6 +658,7 @@ section.cfg{padding:6px 6px 14px}
         <div class="tiporow">
           <button class="tbtn" id="tipoGo" title="Suggérer des tags qui vont avec ton prompt">✨ Enrichir</button>
           <button class="tbtn" id="tipoDescBtn" title="Décrire une idée en une phrase">💬 Décrire</button>
+          <button class="tbtn" id="aiGo" title="Réécrire le prompt avec DeepSeek / Grok (clé dans ⚙️)">🪄 Améliorer</button>
           <div class="seg tlen" id="tipoLen"><button data-v="very_short">léger</button><button data-v="short">moyen</button><button data-v="long">généreux</button></div>
         </div>
         <div class="tipodesc" id="tipoDesc" hidden>
@@ -913,6 +918,14 @@ section.cfg{padding:6px 6px 14px}
     <div class="row"><div><input type="password" id="civKey" placeholder="••••••" autocomplete="off"></div><button class="btn" id="civKeySave" style="flex:none;height:48px">Enregistrer</button></div>
     <p class="muted" style="margin:8px 2px 0" id="civKeyHint">Civitai → ton compte → Settings → API Keys → Add API key. Elle reste sur le PC.</p>
 
+    <h3 class="st">IA · améliorer le prompt</h3>
+    <div class="seg" id="segAi" style="margin-top:8px"><button data-v="deepseek">DeepSeek</button><button data-v="grok">Grok</button></div>
+    <label class="lbl" for="aiModel">Modèle (vide = par défaut)</label>
+    <input type="text" id="aiModel" placeholder="deepseek-chat" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <label class="lbl" for="aiKey">Clé API</label>
+    <div class="row"><div><input type="password" id="aiKey" placeholder="••••••" autocomplete="off"></div><button class="btn" id="aiKeySave" style="flex:none;height:48px">Enregistrer</button></div>
+    <p class="muted" style="margin:8px 2px 0">Seul le prompt est envoyé au fournisseur choisi quand tu appuies sur 🪄. La clé reste sur le PC.</p>
+
     <h3 class="st">Serveur</h3>
     <div class="muted" id="srvInfo" style="margin:6px 2px 0">…</div>
     <div class="btnrow"><button class="btn small" id="srvFree">Libérer la VRAM</button><button class="btn small danger" id="srvRestart">Redémarrer Forge</button></div>
@@ -984,7 +997,7 @@ const EN = {
   "= active aussi le LoRA qui va avec.": "= also enables the matching LoRA.",
   "Filtrer…": "Filter…", "Rien ici pour l'instant.": "Nothing here yet.", "Génère quelques images : les tags apparaîtront ici.": "Generate a few images: tags will show up here.",
   // prompt / TIPO / vérification
-  "✨ Enrichir": "✨ Enrich", "💬 Décrire": "💬 Describe", "léger": "light", "moyen": "medium", "généreux": "generous",
+  "🪄 Améliorer": "🪄 Improve", "Réécrire le prompt avec DeepSeek / Grok (clé dans ⚙️)": "Rewrite the prompt with DeepSeek / Grok (key in ⚙️)", "IA · améliorer le prompt": "AI · improve prompt", "Modèle (vide = par défaut)": "Model (empty = default)", "Clé API": "API key", "Seul le prompt est envoyé au fournisseur choisi quand tu appuies sur 🪄. La clé reste sur le PC.": "Only the prompt is sent to the chosen provider when you press 🪄. The key stays on the PC.", "Prompt amélioré": "Prompt improved", "Ajoute d'abord ta clé IA dans ⚙️": "Add your AI key in ⚙️ first", "Écris un prompt, ou une idée dans « Décrire »": "Write a prompt, or an idea in “Describe”", "L'IA n'a pas répondu": "The AI did not answer", "Clé IA enregistrée sur le PC": "AI key saved on the PC", "✨ Enrichir": "✨ Enrich", "💬 Décrire": "💬 Describe", "léger": "light", "moyen": "medium", "généreux": "generous",
   "Proposer": "Suggest", "Tout ajouter": "Add all", "Encore ↻": "Again ↻", "Suggérer des tags qui vont avec ton prompt": "Suggest tags that fit your prompt",
   "Décrire une idée en une phrase": "Describe an idea in one sentence", "Réflexion…": "Thinking…", "Installer TIPO": "Install TIPO",
   "TIPO n'est pas encore installé sur le PC.": "TIPO is not installed on the PC yet.", "TIPO n'est pas installé": "TIPO is not installed",
@@ -1710,7 +1723,9 @@ function goLabel() {
   const paused = !!(Q && Q.paused && Q.pending.length);
   const go = $("#go");
   go.classList.toggle("resume", paused);
+  go.classList.toggle("adding", !!busy && !paused); go.dataset.n = busy ? (Q.pending.length + (Q.running ? 1 : 0)) : "";
   go.textContent = paused ? `▶ Reprendre la file · ${Q.pending.length}` : busy ? (n > 1 ? `Ajouter ${n} images à la file` : "Ajouter à la file") : (n > 1 ? `Générer ${n} images` : "Générer");
+  go.title = go.textContent;
   $("#qAddBtn").classList.toggle("show", paused);
   $("#qPauseBtn").classList.toggle("show", !!(Q && !Q.paused && Q.running && Q.pending.length));
 }
@@ -2416,7 +2431,7 @@ function bindPhoto() {
   $$("#pTrack img")[1]._clamp = clampZoom;
   const loadFull = () => { const it = vItem(), img = $$("#pTrack img")[1]; if (!it || img._full === it.path) return; img._full = it.path; const full = new Image(); full.onload = () => { if (vItem() === it) img.src = full.src; }; full.src = "/mobile/api/image?path=" + encodeURIComponent(it.path); };
   ph.addEventListener("touchstart", e => {
-    if (e.target.closest(".pbar, .pinfo")) { st = null; return; }
+    if (e.touches.length < 2 && e.target.closest("button, .pinfo")) { st = null; return; }
     if (e.touches.length === 2) {
       const [a, b] = e.touches, base = imgBase();
       if (P.zoom <= 1) { P.zx = 0; P.zy = 0; }
@@ -2750,7 +2765,8 @@ function acShow(ta, tok, tags) {
   const now = acToken(ta);  // le texte a pu bouger pendant la requête
   if (!tags.length || !now || now.text !== tok.text || now.start !== tok.start) { acHide(); return; }
   acEl = ta; acTok = tok; acItems = tags; acSel = 0; acNav = false;
-  if (box.parentElement !== ta.parentElement) ta.parentElement.appendChild(box);
+  const cmp = $("#composer"), inCmp = !!(cmp && cmp.contains(ta) && matchMedia("(max-width:1099px)").matches), host = inCmp ? cmp : ta.parentElement;
+  if (box.parentElement !== host) host.appendChild(box);
   box.textContent = "";
   tags.forEach((t, i) => {
     const d = document.createElement("div"); if (i === 0) d.className = "on";
@@ -2764,7 +2780,7 @@ function acShow(ta, tok, tags) {
     box.appendChild(d);
   });
   box.style.display = "block";
-  if (matchMedia("(pointer:coarse)").matches) box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (!inCmp && matchMedia("(pointer:coarse)").matches) box.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 function acHide() { $("#ac").style.display = "none"; acItems = []; acEl = null; acNav = false; clearTimeout(acTimer); acReq++; }
 function acMove(d) {
@@ -3099,7 +3115,33 @@ async function loadSettings() {
   try { SET = await api("/mobile/api/settings"); } catch (e) { return; }
   if (document.activeElement !== $("#nTopic")) $("#nTopic").value = SET.ntfy_topic || "";
   $$("#segNotify button").forEach(b => b.classList.toggle("on", b.dataset.v === (SET.notify || "end")));
-  renderCivKey();
+  renderCivKey(); renderAiSet();
+}
+const AI_DEF = { deepseek: "deepseek-chat", grok: "grok-3-mini" };
+function renderAiSet() {
+  const pv = SET.ai_provider || "deepseek";
+  $$("#segAi button").forEach(b => b.classList.toggle("on", b.dataset.v === pv));
+  if (document.activeElement !== $("#aiModel")) { $("#aiModel").value = SET.ai_model || ""; $("#aiModel").placeholder = AI_DEF[pv]; }
+  $("#aiKey").placeholder = SET.ai_key_set ? "clé enregistrée ✓ (coller pour remplacer)" : "colle ta clé ici";
+}
+async function saveAi(extra = {}) {
+  try { SET = await api("/mobile/api/settings", { method: "POST", body: JSON.stringify({ ai_provider: SET.ai_provider || "deepseek", ai_model: $("#aiModel").value.trim(), ...extra }) }); renderAiSet(); return true; }
+  catch (e) { toast("Enregistrement impossible", true); return false; }
+}
+let aiBusy = false;
+async function aiRun() {
+  if (aiBusy) return;
+  const before = S.prompt || "", typed = $("#tipoText").value.trim();
+  if (!before.trim() && !typed) { $("#tipoDesc").hidden = false; $("#tipoText").focus(); toast("Écris un prompt, ou une idée dans « Décrire »"); return; }
+  if (!SET.ai_key_set) { toast("Ajoute d'abord ta clé IA dans ⚙️", true); return; }
+  aiBusy = true; const b = $("#aiGo"), lab = b.textContent; b.disabled = true; b.textContent = "…";
+  try {
+    const r = await api("/mobile/api/ai/enhance", { method: "POST", body: JSON.stringify({ prompt: before, mode: before.trim() ? "improve" : "describe", extra: typed }) });
+    setPromptText(r.prompt); hlAll(); renderCheck();
+    toast("Prompt amélioré", false, { label: "Annuler", fn: () => { setPromptText(before); hlAll(); renderCheck(); } });
+  } catch (e) {
+    const m = e.message.match(/"detail":"([^"]+)"/); toast(m ? m[1] : "L'IA n'a pas répondu", true);
+  } finally { aiBusy = false; b.disabled = false; b.textContent = lab; }
 }
 async function saveSettings() {
   const body = { ntfy_topic: $("#nTopic").value.trim(), notify: SET.notify || "end" };
@@ -3120,6 +3162,10 @@ function renderAppHints() {
     : installEvt ? "" : "Menu du navigateur ⋮ → « Installer l'application » / « Ajouter à l'écran d'accueil ».";
 }
 function bindSettings() {
+  $$("#segAi button").forEach(b => b.onclick = () => { SET.ai_provider = b.dataset.v; $("#aiModel").value = ""; saveAi(); });
+  $("#aiModel").addEventListener("change", () => saveAi());
+  $("#aiKeySave").onclick = async () => { const v = $("#aiKey").value.trim(); if (!v) { toast("Colle d'abord ta clé", true); return; } if (await saveAi({ ai_key: v })) { $("#aiKey").value = ""; toast("Clé IA enregistrée sur le PC"); } };
+  $("#aiGo").onclick = aiRun;
   $("#nLocal").onchange = async e => {
     if (e.target.checked) {
       if (!("Notification" in window) || !window.isSecureContext) { e.target.checked = false; toast("Il faut ouvrir la page en https", true); return; }

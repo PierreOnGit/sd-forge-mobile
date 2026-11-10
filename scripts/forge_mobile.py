@@ -573,10 +573,72 @@ def _delete_preset(name):
     return items
 
 
+# ---------------------------------------------------------------- amélioration de prompt par IA (DeepSeek / Grok)
+
+AI_PROVIDERS = {
+    "deepseek": ("https://api.deepseek.com/chat/completions", "deepseek-chat"),
+    "grok": ("https://api.x.ai/v1/chat/completions", "grok-3-mini"),
+}
+AI_SYSTEM = (
+    "You rewrite prompts for Stable Diffusion XL anime models (Illustrious / Danbooru style). "
+    "Output ONLY the final prompt as a single line of comma-separated lowercase Danbooru-style tags, no explanation, "
+    "no quotes, no markdown. Keep every element the user asked for (subject, character, clothing, pose, setting, mood) "
+    "and keep any <lora:...> or <hypernet:...> tokens and weights such as (tag:1.2) exactly as written. "
+    "Add precise, coherent details (composition, camera angle, lighting, background, expression) without contradicting the user's intent. "
+    "Do not add quality tags the user did not have unless the prompt has none (then start with masterpiece, best quality). "
+    "Do not invent new characters or content the user did not imply."
+)
+
+
+def _ai_enhance(prompt, mode, extra):
+    s = _read_settings()
+    key = str(s.get("ai_key") or "").strip()
+    if not key:
+        raise HTTPException(status_code=400, detail="Aucune clé API IA enregistrée (⚙️ → IA).")
+    prov = str(s.get("ai_provider") or "deepseek")
+    url, default_model = AI_PROVIDERS.get(prov, AI_PROVIDERS["deepseek"])
+    model = str(s.get("ai_model") or "").strip() or default_model
+    prompt = (prompt or "").strip()
+    if not prompt and not extra:
+        raise HTTPException(status_code=400, detail="Prompt vide.")
+    if mode == "describe" or not prompt:
+        user = "Write a prompt from this idea:\n" + (extra or prompt)
+    else:
+        user = "Improve this prompt:\n" + prompt
+        if extra:
+            user += "\n\nInstruction: " + extra
+    body = json.dumps({"model": model, "temperature": 0.7, "max_tokens": 700,
+                       "messages": [{"role": "system", "content": AI_SYSTEM}, {"role": "user", "content": user}]}).encode()
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
+    t0 = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            data = json.loads(r.read().decode("utf-8", "replace"))
+    except urllib.error.HTTPError as e:
+        code = e.code
+        msg = {401: "clé API refusée", 402: "solde insuffisant", 404: "modèle introuvable", 429: "trop de requêtes"}.get(code, f"erreur HTTP {code}")
+        _log(f"ai enhance: {prov} HTTP {code}")
+        raise HTTPException(status_code=502, detail=f"{prov} : {msg}")
+    except Exception as e:
+        _log(f"ai enhance: {prov} {type(e).__name__}")
+        raise HTTPException(status_code=502, detail=f"{prov} injoignable")
+    try:
+        out = data["choices"][0]["message"]["content"]
+    except Exception:
+        raise HTTPException(status_code=502, detail="Réponse inattendue de l'IA")
+    out = re.sub(r"^```\w*\s*|\s*```$", "", out.strip()).strip().strip('"').replace("\n", " ")
+    out = re.sub(r"\s{2,}", " ", out)
+    if not out:
+        raise HTTPException(status_code=502, detail="Réponse vide de l'IA")
+    return {"prompt": out, "model": model, "seconds": round(time.time() - t0, 1)}
+
+
 # ---------------------------------------------------------------- réglages (notifications)
 
 DEFAULT_SETTINGS = {"ntfy_topic": "", "ntfy_server": "https://ntfy.sh", "notify": "end", "click_url": "",
-                    "civitai_key": "", "civitai_host": ""}
+                    "civitai_key": "", "civitai_host": "",
+                    "ai_provider": "deepseek", "ai_model": "", "ai_key": ""}
+SECRET_KEYS = ("civitai_key", "ai_key")
 
 
 def _read_settings():
@@ -1752,6 +1814,10 @@ def _register_routes(app):
             threading.Thread(target=_tipo_install, daemon=True).start()
         return {"ok": True}
 
+    @app.post("/mobile/api/ai/enhance")
+    def ai_enhance(body: dict):
+        return _ai_enhance(str(body.get("prompt", "")), str(body.get("mode", "improve")), str(body.get("extra", ""))[:500])
+
     @app.post("/mobile/api/tipo/suggest")
     def tipo_suggest(body: dict):
         return _tipo_suggest(str(body.get("prompt", "")), str(body.get("describe", "")),
@@ -1794,8 +1860,9 @@ def _register_routes(app):
 
     # --- réglages / notifications
     def public_settings(s):
-        out = {k: v for k, v in s.items() if k != "civitai_key"}
-        out["civitai_key_set"] = bool(str(s.get("civitai_key", "")).strip())
+        out = {k: v for k, v in s.items() if k not in SECRET_KEYS}
+        for k in SECRET_KEYS:
+            out[k + "_set"] = bool(str(s.get(k, "")).strip())
         return out
 
     @app.get("/mobile/api/settings")
@@ -1808,9 +1875,9 @@ def _register_routes(app):
         for k, v in body.items():
             if k not in DEFAULT_SETTINGS or not isinstance(v, str):
                 continue
-            if k == "civitai_key" and not v.strip():
+            if k in SECRET_KEYS and not v.strip():
                 continue  # champ vide = on garde la clé existante
-            s[k] = "" if (k == "civitai_key" and v.strip() == "-") else v.strip()
+            s[k] = "" if (k in SECRET_KEYS and v.strip() == "-") else v.strip()
         _write_json(SETTINGS_FILE, s)
         return public_settings(s)
 
