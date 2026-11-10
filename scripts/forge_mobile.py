@@ -607,12 +607,12 @@ def _ai_enhance(prompt, mode, extra):
         user = "Improve this prompt:\n" + prompt
         if extra:
             user += "\n\nInstruction: " + extra
-    body = json.dumps({"model": model, "temperature": 0.7, "max_tokens": 700,
+    body = json.dumps({"model": model, "temperature": 0.7, "max_tokens": 3000,
                        "messages": [{"role": "system", "content": AI_SYSTEM}, {"role": "user", "content": user}]}).encode()
     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
     t0 = time.time()
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
+        with urllib.request.urlopen(req, timeout=120) as r:
             data = json.loads(r.read().decode("utf-8", "replace"))
     except urllib.error.HTTPError as e:
         code = e.code
@@ -623,13 +623,22 @@ def _ai_enhance(prompt, mode, extra):
         _log(f"ai enhance: {prov} {type(e).__name__}")
         raise HTTPException(status_code=502, detail=f"{prov} injoignable")
     try:
-        out = data["choices"][0]["message"]["content"]
+        msg = data["choices"][0]["message"]
+        out = msg.get("content") or ""
     except Exception:
+        _log(f"ai enhance: {prov} réponse inattendue")
         raise HTTPException(status_code=502, detail="Réponse inattendue de l'IA")
     out = re.sub(r"^```\w*\s*|\s*```$", "", out.strip()).strip().strip('"').replace("\n", " ")
     out = re.sub(r"\s{2,}", " ", out)
     if not out:
-        raise HTTPException(status_code=502, detail="Réponse vide de l'IA")
+        fin = ""
+        try:
+            fin = str(data["choices"][0].get("finish_reason") or "")
+        except Exception:
+            pass
+        _log(f"ai enhance: {prov} réponse vide (modèle {model}, fin={fin})")
+        raise HTTPException(status_code=502, detail=f"Réponse vide de {model}" + (" (trop long, modèle « réflexion » ?)" if fin == "length" else ""))
+    _log(f"ai enhance: {prov}/{model} ok en {round(time.time() - t0, 1)} s")
     return {"prompt": out, "model": model, "seconds": round(time.time() - t0, 1)}
 
 

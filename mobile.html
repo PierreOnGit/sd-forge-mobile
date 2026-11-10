@@ -298,6 +298,14 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 /* mobile : galerie en grandes tuiles, bloc de saisie unique en bas (prompt + « + » + format/nombre + envoyer), réglages derrière « + » */
 :root{--kb:0px;--vvh:100dvh;--sab:env(safe-area-inset-bottom,0px);--ch:150px}
 .cfgbar,#cfgOpen,.cmpplus,.cmppill,.cmpsp,.cmpshut,.cmppop{display:none}
+.cmlr{display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;margin-bottom:10px}
+.cmlr .nm{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmlr .wv{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cmlr .rm{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1}
+.cmlr input[type=range]{grid-column:1/-1}
+.cmres{max-height:200px;overflow:auto;margin-top:6px;border-radius:12px}
+.cmres div{padding:9px 10px;border-radius:10px;font-size:13.5px;cursor:pointer}.cmres div:hover{background:var(--field)}.cmres small{color:var(--muted);margin-left:6px}
+#cmpLora input[type=search]{width:100%;margin-top:2px}
 @media (min-width:0px){
   .mtabs,.rail,#gJump,#cfgOpen{display:none !important}
   body{padding-bottom:calc(var(--ch) + 12px)}
@@ -882,12 +890,19 @@ body:not(.psheet) #composer .cmpref{display:none !important}
   <div class="dockinfo" id="dockInfo"></div>
   <div class="cmppop glass" id="cmpPop">
     <div class="group-title">Format</div><div class="chips" id="pRatios"></div>
+    <div class="group-title">Steps · CFG</div>
+    <div class="cgrid"><div><label class="lbl">Steps <b data-show="steps"></b></label><input type="range" data-key="steps" min="1" max="60" step="1"></div><div><label class="lbl">CFG <b data-show="cfg"></b></label><input type="range" data-key="cfg" min="1" max="12" step="0.5"></div></div>
     <div class="group-title">Nombre d'images</div><div class="seg" id="pCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button><button data-v="8">8</button></div>
+  </div>
+  <div class="cmppop glass" id="cmpLora">
+    <div class="group-title">LoRAs actifs</div><div id="cmLoraList"></div>
+    <input type="search" id="cmLoraQ" placeholder="Ajouter un LoRA…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="cmres" id="cmLoraRes"></div>
   </div>
   <div class="dockrow">
     <button class="cmpplus" id="cmpPlus" aria-label="Studio" title="Studio : réglages, LoRAs, tags…">+</button>
     <button class="cmppill" id="cmpPill" aria-label="Format et nombre d'images"><i class="rb" id="cmpRb"></i><span id="cmpPillTxt"></span></button>
-    <span class="cmpsp"></span>
+    <button class="cmppill" id="cmpLoraBtn" aria-label="LoRAs" title="LoRAs"><span id="cmpLoraTxt">LoRA</span></button><span class="cmpsp"></span>
     <button class="grip" id="dockGrip" title="Glisser pour déplacer · double-clic pour replacer" aria-label="Déplacer">⠿</button>
     <button class="dthumb" id="dThumb" title="Dernière image"><img id="dThumbImg" alt=""></button>
     <button class="go" id="go">Générer</button>
@@ -1115,7 +1130,7 @@ const EN = {
   "Image introuvable": "Image not found",
   // visionneuse
   "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
-  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "LoRAs actifs": "Active LoRAs", "Ajouter un LoRA…": "Add a LoRA…", "Steps · CFG": "Steps · CFG", "Favori": "Favorite", "Réutiliser le prompt": "Reuse prompt", "Prompt repris de cette image": "Prompt taken from this image", "Retirer": "Remove", "Corriger aussi le corps entier": "Also fix the whole body", "Repasse sur tout le personnage (jambes, pieds, proportions)": "Reworks the whole character (legs, feet, proportions)", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
   "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
   "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
   "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
@@ -1833,12 +1848,40 @@ function renderLoras() {
   $("#loraOffT").style.display = off.children.length ? "" : "none";
   renderActLoras();
 }
-function renderActLoras() {
+function renderCmLora() {
+  const list = $("#cmLoraList"); if (!list || !S) return;
+  const act = (S.loras || []).filter(l => l.enabled);
+  $("#cmpLoraTxt").textContent = act.length ? "LoRA · " + act.length : "LoRA";
+  if (list.contains(document.activeElement) && document.activeElement.type === "range") return;
+  list.textContent = "";
+  if (!act.length) { const m = document.createElement("div"); m.className = "muted"; m.style.marginBottom = "8px"; m.textContent = "Aucun LoRA actif."; list.appendChild(m); }
+  for (const l of act) {
+    const r = document.createElement("div"); r.className = "cmlr";
+    const nm = document.createElement("div"); nm.className = "nm"; nm.textContent = l.name; nm.setAttribute("data-noi18n", "");
+    const wv = document.createElement("span"); wv.className = "wv"; wv.textContent = fmt(l.weight, "0.05");
+    const rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label", "Retirer");
+    rm.onclick = () => { l.enabled = false; renderLoras(); changed(); };
+    const rg = document.createElement("input"); rg.type = "range"; rg.min = "0"; rg.max = "1.5"; rg.step = "0.05"; rg.value = l.weight; paintRange(rg);
+    rg.oninput = () => { l.weight = parseFloat(rg.value); wv.textContent = fmt(l.weight, "0.05"); paintRange(rg); renderActLoras(true); changed(); };
+    r.append(nm, wv, rm, rg); list.appendChild(r);
+  }
+  const q = $("#cmLoraQ").value.trim().toLowerCase(), res = $("#cmLoraRes"); res.textContent = "";
+  const names = new Set(act.map(l => l.name));
+  const pool = [...(S.loras || []).filter(l => !l.enabled).map(l => ({ name: l.name, folder: "" })), ...loraCatalog]
+    .filter((l, i, a) => !names.has(l.name) && a.findIndex(x => x.name === l.name) === i && (!q || (l.name + " " + (l.folder || "")).toLowerCase().includes(q))).slice(0, 14);
+  for (const l of pool) {
+    const d = document.createElement("div"); d.textContent = l.name; d.setAttribute("data-noi18n", "");
+    d.onclick = () => { S.loras = S.loras || []; const ex = S.loras.find(x => x.name === l.name); if (ex) ex.enabled = true; else S.loras.push({ name: l.name, weight: 0.7, enabled: true }); $("#cmLoraQ").value = ""; renderLoras(); changed(); };
+    res.appendChild(d);
+  }
+}
+function renderActLoras(skipCm) {
+  if (skipCm !== true) renderCmLora();
   const box = $("#actLoras"); if (!box || !S) return; box.textContent = "";
   for (const l of (S.loras || []).filter(x => x.enabled)) {
     const c = document.createElement("button"); c.className = "chip"; c.title = "Régler dans l'onglet LoRAs";
     c.append(l.name + " "); const b = document.createElement("b"); b.textContent = fmt(l.weight, "0.05"); c.appendChild(b);
-    c.onclick = () => { showTab("loras"); $("section.cfg").scrollIntoView({ block: "nearest", behavior: "smooth" }); };
+    c.onclick = () => { $("#cmpPop").classList.remove("show"); $("#cmpLora").classList.add("show"); };
     box.appendChild(c);
   }
 }
@@ -3224,7 +3267,8 @@ async function aiRun() {
     setPromptText(r.prompt); hlAll(); renderCheck();
     toast("Prompt amélioré", false, { label: "Annuler", fn: () => { setPromptText(before); hlAll(); renderCheck(); } });
   } catch (e) {
-    const m = e.message.match(/"detail":"([^"]+)"/); toast(m ? m[1] : "L'IA n'a pas répondu", true);
+    const m = e.message.match(/"detail":"([^"]+)"/); const msg = m ? m[1] : "L'IA n'a pas répondu : " + String(e.message || e).slice(0, 100);
+    $("#tipoBox").hidden = false; $("#tipoInfo").textContent = msg; $("#tipoChips").textContent = ""; toast(msg, true);
   } finally { aiBusy = false; b.disabled = false; b.textContent = lab; setWorking(b, false); }
 }
 async function saveSettings() {
@@ -3364,9 +3408,12 @@ async function init() {
     document.addEventListener("pointerdown", e => {
       if (!mq.matches) return;
       if (!e.target.closest("#cmpPop, #cmpPill")) $("#cmpPop").classList.remove("show");
+      if (!e.target.closest("#cmpLora, #cmpLoraBtn, #actLoras")) $("#cmpLora").classList.remove("show");
       if (document.body.classList.contains("psheet") && !e.target.closest("#composer, #ac, #toast, .toast")) close();
     }, true);
-    $("#cmpPill").onclick = () => $("#cmpPop").classList.toggle("show");
+    $("#cmpPill").onclick = () => { $("#cmpLora").classList.remove("show"); $("#cmpPop").classList.toggle("show"); };
+    $("#cmpLoraBtn").onclick = () => { $("#cmpPop").classList.remove("show"); $("#cmpLora").classList.toggle("show"); renderCmLora(); };
+    $("#cmLoraQ").addEventListener("input", renderCmLora);
     $$("#pCount button").forEach(b => b.onclick = () => { S.batch_count = +b.dataset.v; render(); changed(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("psheet")) close(); });
     // sheet Studio (tous les réglages sauf le prompt)
