@@ -116,7 +116,7 @@ DEFAULT_STATE = {
         "steps": 0,
         "tiled": True,
     },
-    "adetailer": {"enabled": False, "denoise": 0.3, "faces": 1, "hands": False, "feet": ""},
+    "adetailer": {"enabled": False, "denoise": 0.3, "faces": 1, "hands": False, "body": False, "feet": ""},
     "sampler": "DPM++ 2M",
     "scheduler": "Karras",
     "steps": 28,
