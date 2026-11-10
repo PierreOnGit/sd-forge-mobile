@@ -580,13 +580,20 @@ AI_PROVIDERS = {
     "grok": ("https://api.x.ai/v1/chat/completions", "grok-3-mini"),
 }
 AI_SYSTEM = (
-    "You rewrite prompts for Stable Diffusion XL anime models (Illustrious / Danbooru style). "
-    "Output ONLY the final prompt as a single line of comma-separated lowercase Danbooru-style tags, no explanation, "
-    "no quotes, no markdown. Keep every element the user asked for (subject, character, clothing, pose, setting, mood) "
-    "and keep any <lora:...> or <hypernet:...> tokens and weights such as (tag:1.2) exactly as written. "
-    "Add precise, coherent details (composition, camera angle, lighting, background, expression) without contradicting the user's intent. "
-    "Do not add quality tags the user did not have unless the prompt has none (then start with masterpiece, best quality). "
-    "Do not invent new characters or content the user did not imply."
+    "You improve prompts for Stable Diffusion XL anime models (Illustrious, Danbooru tag style). "
+    "OUTPUT: only the final prompt on one line, comma-separated lowercase Danbooru tags with spaces (not underscores); "
+    "no sentences, no explanation, no quotes, no markdown.\n"
+    "RULES:\n"
+    "- Keep ALL the user's existing tags, in their original order, unchanged. This includes character names, artist tags, "
+    "quality tags, LoRA triggers, <lora:...> tokens and weights like (tag:1.2). Never delete, reword, merge or reweight them.\n"
+    "- Only ADD a few tags (at most about 10), appended after the user's tags or placed next to related ones. Add only real Danbooru tags "
+    "that clearly fit what the prompt already describes: composition / camera angle, lighting, background and setting, pose, expression, "
+    "small clothing or accessory details that are consistent with the scene.\n"
+    "- Do not contradict the prompt. Do not add new characters, new people, a different art style, a different mood, or content the prompt does not already imply. "
+    "Do not add or remove explicitness; keep the same level.\n"
+    "- Do not repeat a tag, and do not add synonyms of tags already present. Do not add quality or style tags if the prompt already has some; "
+    "if it has none, add 'masterpiece, best quality' at the start.\n"
+    "- If you are unsure that a tag exists on Danbooru, leave it out."
 )
 
 
@@ -607,8 +614,12 @@ def _ai_enhance(prompt, mode, extra):
         user = "Improve this prompt:\n" + prompt
         if extra:
             user += "\n\nInstruction: " + extra
-    body = json.dumps({"model": model, "temperature": 0.7, "max_tokens": 3000,
-                       "messages": [{"role": "system", "content": AI_SYSTEM}, {"role": "user", "content": user}]}).encode()
+    system = AI_SYSTEM
+    extra_rules = str(s.get("ai_extra") or "").strip()
+    if extra_rules:
+        system += "\nAdditional instructions from the user (follow them): " + extra_rules[:600]
+    body = json.dumps({"model": model, "temperature": 0.4, "max_tokens": 3000,
+                       "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}).encode()
     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json", "Authorization": "Bearer " + key})
     t0 = time.time()
     try:
@@ -646,7 +657,7 @@ def _ai_enhance(prompt, mode, extra):
 
 DEFAULT_SETTINGS = {"ntfy_topic": "", "ntfy_server": "https://ntfy.sh", "notify": "end", "click_url": "",
                     "civitai_key": "", "civitai_host": "",
-                    "ai_provider": "deepseek", "ai_model": "", "ai_key": ""}
+                    "ai_provider": "deepseek", "ai_model": "", "ai_key": "", "ai_extra": ""}
 SECRET_KEYS = ("civitai_key", "ai_key")
 
 
