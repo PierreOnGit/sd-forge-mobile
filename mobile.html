@@ -235,6 +235,14 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .ptop{top:0;padding-top:calc(10px + env(safe-area-inset-top));background:linear-gradient(rgba(0,0,0,.6),transparent)}
 .pbot{bottom:0;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.65));justify-content:center}
 .photo.bare .pbar,.photo.info .pbar{opacity:0;pointer-events:none}
+@media (hover:hover) and (pointer:fine){
+  .photo:not(.info) .pbar{opacity:0;pointer-events:none;transition:opacity .35s}
+  .photo:not(.bare):not(.info):hover .pbar{opacity:.9;pointer-events:auto}
+  .photo .ptop{background:linear-gradient(rgba(0,0,0,.28),transparent)}
+  .photo .pbot{background:linear-gradient(transparent,rgba(0,0,0,.3));padding-bottom:18px}
+  .photo .pbtn{height:36px;min-width:36px;border-radius:18px;background:rgba(30,30,40,.4);border-color:rgba(255,255,255,.1)}
+  .photo .pbtn.wide{font-size:13px;font-weight:550;flex:none;min-width:150px}
+}
 .pcount{flex:1;color:#fff;font-weight:600;font-size:14px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .pbtn{height:42px;min-width:42px;border-radius:21px;border:1px solid rgba(255,255,255,.18);background:rgba(30,30,40,.55);color:#fff;display:grid;place-items:center;font-size:18px;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);cursor:pointer;padding:0 14px}
@@ -644,6 +652,7 @@ section.cfg{padding:6px 6px 14px}
 
 /* ===== desktop : style « Flow » — galerie plein écran, bloc de saisie flottant centré, Studio en panneau latéral ===== */
 .cmpref{display:none}
+body:has(#viewer.show) #composer,body:has(#photo.show) #composer,body:has(.sheet.show) #composer{display:none !important}
 #composer .cmpref:not([hidden]){display:block;position:relative;width:76px;height:76px;margin:0 0 8px;flex:none}
 body:not(.psheet) #composer .cmpref{display:none !important}
 .cmpref img{width:100%;height:100%;object-fit:cover;border-radius:14px;display:block}
@@ -674,7 +683,8 @@ body:not(.psheet) #composer .cmpref{display:none !important}
   body.typing:not(.psheet) #composer{display:flex}
   body.typing .dock{transform:none;opacity:1;pointer-events:auto}
   #composer .hl textarea,#composer .hl .hlb{font-size:16px}
-  body.psheet #composer .hl textarea#prompt{min-height:140px;max-height:34vh}
+  body.psheet #composer .hl textarea#prompt{min-height:84px;max-height:34vh}
+  #composer{background:color-mix(in srgb,var(--bg) 94%,transparent)}
   body.psheet #composer section[data-sec=prompt]>.body{max-height:min(56vh,calc(100vh - 200px))}
   #composer .cmpshut{top:12px;right:14px}
   #composer>.ac{left:20px;right:20px}
