@@ -744,12 +744,16 @@ section.cfg{padding:6px 6px 14px}
         <div><label class="lbl">Hires steps <b data-show="hires.steps" data-zero="= base"></b></label><input type="range" data-key="hires.steps" min="0" max="40" step="1"></div>
       </div>
       <div class="switchrow small" title="évite que Forge gèle sur le VAE en grande taille (8 Go)"><label class="toggle"><input type="checkbox" data-key="hires.tiled"><span></span></label><span>Décodage VAE en tuiles</span></div>
-      <div class="group-title" style="margin-top:14px">Correction du visage · ADetailer</div>
+      <div class="group-title" style="margin-top:14px">Correction visage, mains, pieds · ADetailer</div>
       <div class="row hrow">
         <div class="switchrow" style="flex:none"><label class="toggle"><input type="checkbox" data-key="adetailer.enabled"><span></span></label><span>Activer</span></div>
         <div class="seg mini" id="adFaces"><button data-v="1">1 visage</button><button data-v="2">2</button><button data-v="0">Tous</button></div>
       </div>
       <div class="cgrid"><div><label class="lbl">Force <b data-show="adetailer.denoise"></b></label><input type="range" data-key="adetailer.denoise" min="0.1" max="0.6" step="0.05"></div></div>
+      <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="adetailer.hands"><span></span></label><span>Corriger aussi les mains</span></div>
+      <label class="lbl" for="adFeet">Pieds · modèle de détection (optionnel)</label>
+      <input type="text" id="adFeet" data-key="adetailer.feet" placeholder="ex. foot_yolov8n.pt" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="muted">Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).</div>
       <div class="muted">Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.</div>
     </div>
 
@@ -1059,7 +1063,7 @@ const EN = {
   "Image introuvable": "Image not found",
   // visionneuse
   "Favori": "Favorite", "Fermer": "Close", "Précédente": "Previous", "Suivante": "Next", "Taille": "Size", "Steps / CFG": "Steps / CFG",
-  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
+  "Reprendre le prompt": "Reuse prompt", "Variation": "Variation", "Correction visage, mains, pieds · ADetailer": "Face, hands, feet fix · ADetailer", "Corriger aussi les mains": "Also fix hands", "Pieds · modèle de détection (optionnel)": "Feet · detection model (optional)", "Pas de modèle « pieds » fourni par défaut : dépose un fichier .pt dans models\\adetailer et écris son nom ici. Les mains utilisent hand_yolov8n.pt (téléchargé par ADetailer).": "No “feet” model ships by default: drop a .pt file in models\\adetailer and type its name here. Hands use hand_yolov8n.pt (downloaded by ADetailer).", "Correction du visage · ADetailer": "Face fix · ADetailer", "1 visage": "1 face", "Tous": "All", "Force": "Strength", "Réglages prudents : détection stricte (confiance 0,5), visages trop petits ignorés, retouche légère. Si Forge refuse le script, l'image sort sans correction.": "Conservative settings: strict detection (0.5 confidence), tiny faces ignored, light retouch. If Forge rejects the script, the image is produced without the fix.", "✦ Variation": "✦ Variation", "Lancer la variation": "Start variation", "Force du changement": "Change strength", "Nombre d'images": "Number of images", "Subtile": "Subtle", "Moyenne": "Medium", "Forte": "Strong", "Annuler": "Cancel", "Repart de cette image (img2img) avec le même prompt, une nouvelle seed.": "Starts from this image (img2img) with the same prompt and a new seed.", "Variation ajoutée à la file": "Variation queued", "Pas de prompt enregistré pour cette image": "No prompt saved for this image", "Prompt + réglages + seed": "Prompt + settings + seed", "Ouvrir l'original": "Open original", "Infos": "Info",
   "· toucher pour filtrer": "· tap to filter", "Filtrer par ce LoRA": "Filter by this LoRA", "(pas de prompt enregistré)": "(no saved prompt)",
   "Pas de prompt dans cette image": "No prompt in this image", "Prompt et LoRAs repris": "Prompt and LoRAs reused",
   "Prompt, LoRAs et réglages repris": "Prompt, LoRAs and settings reused", "Seed copiée": "Seed copied", "Favori impossible": "Could not set favorite",
@@ -1922,10 +1926,14 @@ function payloadFor(st, n) {
 // ADetailer : réglages volontairement prudents (confiance haute, k plus grands visages, petits masques ignorés, denoise bas)
 function adScript(st) {
   const a = st.adetailer; if (!a || !a.enabled) return {};
-  return { ADetailer: { args: [true, false, {
-    ad_model: "face_yolov8s.pt", ad_confidence: 0.5, ad_mask_k: +a.faces || 0, ad_mask_min_ratio: 0.01,
-    ad_denoising_strength: +a.denoise || 0.3, ad_inpaint_only_masked: true, ad_inpaint_only_masked_padding: 32, ad_mask_blur: 4, ad_dilate_erode: 4,
-  }] } };
+  const unit = (model, conf, k, pad) => ({
+    ad_model: model, ad_confidence: conf, ad_mask_k: k, ad_mask_min_ratio: 0.01,
+    ad_denoising_strength: +a.denoise || 0.3, ad_inpaint_only_masked: true, ad_inpaint_only_masked_padding: pad, ad_mask_blur: 4, ad_dilate_erode: 4,
+  });
+  const units = [unit("face_yolov8s.pt", 0.5, +a.faces || 0, 32)];
+  if (a.hands) units.push(unit("hand_yolov8n.pt", 0.4, 0, 24));
+  const feet = String(a.feet || "").trim(); if (feet) units.push(unit(feet, 0.4, 0, 24));
+  return { ADetailer: { args: [true, false, ...units] } };
 }
 function jobLabel(st) {
   const tags = stripLoras(st.prompt || "").split(/[,\n]/).map(t => t.trim()).filter(t => t && !QUALITY.has(t.toLowerCase().replace(/[()\\]/g, "").replace(/:[\d.]+$/, "")));
