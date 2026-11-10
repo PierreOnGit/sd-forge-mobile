@@ -308,18 +308,19 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 .cfgbar,#cfgOpen,.cmpplus,.cmppill,.cmpsp,.cmpshut,.cmppop{display:none}
 .cmsw{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
 #cmpPop{max-height:68vh;overflow-y:auto}
-.cmlr{display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;margin-bottom:10px}
+.cmlr{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:2px 10px;align-items:center;margin-bottom:8px}
+.cmlr.off{opacity:.5;margin-bottom:4px}.cmlr.off .wv{visibility:hidden}
+.toggle.sm{width:36px;height:22px}.toggle.sm span::after{width:18px;height:18px}.toggle.sm input:checked+span::after{transform:translateX(14px)}
 .cmlr .nm{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cmlr .wv{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .cmlr .rm{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1}
-.cmlr input[type=range]{grid-column:1/-1}
+.cmlr input[type=range]{grid-column:1/-1;height:24px}
 .cmres{max-height:200px;overflow:auto;margin-top:6px;border-radius:12px}
 .cmres div{padding:9px 10px;border-radius:10px;font-size:13.5px;cursor:pointer}.cmres div:hover{background:var(--field)}.cmres small{color:var(--muted);margin-left:6px}
 #cmpLora.show{display:flex !important;flex-direction:column;max-height:min(70vh,calc(100vh - var(--ch) - 40px));overflow:hidden;box-sizing:border-box;max-width:calc(100vw - 24px)}
 #cmpLora .group-title,#cmpLora input[type=search]{flex:none}
-#cmLoraList{flex:0 1 auto;min-height:0;max-height:38vh;overflow-y:auto;overflow-x:hidden;padding-right:4px;margin-bottom:6px}
-#cmpLora .cmres{flex:1 1 auto;min-height:90px;max-height:none;overflow-y:auto}
-#cmpLora .cmlr{min-width:0}#cmpLora .cmlr>*{min-width:0}
+#cmLoraList{flex:0 1 auto;min-height:60px;max-height:48vh;overflow-y:auto;overflow-x:hidden;padding-right:4px;margin-bottom:8px}
+#cmpLora .cmres{flex:1 1 0;min-height:120px;max-height:none;overflow-y:auto}
 #cmpLora input[type=search]{width:100%;margin-top:2px;box-sizing:border-box}
 @media (min-width:0px){
   .mtabs,.rail,#gJump,#cfgOpen{display:none !important}
@@ -981,7 +982,7 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
     <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="hires.enabled"><span></span></label><span>Hires fix</span></div></div>
   </div>
   <div class="cmppop glass" id="cmpLora">
-    <div class="group-title">LoRAs actifs</div><div id="cmLoraList"></div>
+    <div class="group-title">LoRAs</div><div id="cmLoraList"></div>
     <input type="search" id="cmLoraQ" placeholder="Ajouter un LoRA…" autocomplete="off" autocapitalize="off" spellcheck="false">
     <div class="cmres" id="cmLoraRes"></div>
   </div>
@@ -1168,7 +1169,7 @@ const EN = {
   "parenthèses mal fermées": "unbalanced parentheses",
   // LoRAs
   "LoRAs": "LoRAs", "Rapide": "Fast", "Activer": "Enable", "à la suite": "in a row", "Aléatoire": "Random", "Inverser": "Swap", "≈ 0,75 MP · plus rapide": "≈ 0.75 MP · faster", "≈ 1 MP · résolution native SDXL": "≈ 1 MP · SDXL native resolution", "Tout afficher": "Show all", "Revenir aux onglets": "Back to tabs", "désactivé · réactiver": "disabled · re-enable", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
-  "Réactiver": "Re-enable", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
+  "Réactiver": "Re-enable", "Désactiver": "Disable", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
   "Importer un LoRA (.safetensors)": "Import a LoRA (.safetensors)", "Chercher sur Civitai": "Search on Civitai", "Ajouter au prompt": "Add to prompt",
   "Déposer le LoRA ici": "Drop the LoRA here", ".safetensors · il sera copié dans models/Lora": ".safetensors · it will be copied to models/Lora",
   "Dépose un fichier .safetensors": "Drop a .safetensors file", "Activer": "Enable", "Activer + mots-clés": "Enable + trigger words",
@@ -1939,24 +1940,32 @@ function renderLoras() {
 }
 function renderCmLora() {
   const list = $("#cmLoraList"); if (!list || !S) return;
-  const act = (S.loras || []).filter(l => l.enabled);
+  const all = S.loras || [], act = all.filter(l => l.enabled);
   $("#cmpLoraTxt").textContent = act.length ? "LoRA · " + act.length : "LoRA";
   if (list.contains(document.activeElement) && document.activeElement.type === "range") return;
   list.textContent = "";
-  if (!act.length) { const m = document.createElement("div"); m.className = "muted"; m.style.marginBottom = "8px"; m.textContent = "Aucun LoRA actif."; list.appendChild(m); }
-  for (const l of act) {
-    const r = document.createElement("div"); r.className = "cmlr";
+  if (!all.length) { const m = document.createElement("div"); m.className = "muted"; m.style.marginBottom = "8px"; m.textContent = "Aucun LoRA actif."; list.appendChild(m); }
+  for (const l of [...act, ...all.filter(x => !x.enabled)]) {
+    const r = document.createElement("div"); r.className = "cmlr" + (l.enabled ? "" : " off");
+    const tg = document.createElement("label"); tg.className = "toggle sm"; tg.title = l.enabled ? "Désactiver" : "Activer";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!l.enabled;
+    const sp = document.createElement("span"); tg.append(cb, sp);
+    cb.onchange = () => { l.enabled = cb.checked; renderLoras(); changed(); };
     const nm = document.createElement("div"); nm.className = "nm"; nm.textContent = l.name; nm.setAttribute("data-noi18n", "");
     const wv = document.createElement("span"); wv.className = "wv"; wv.textContent = fmt(l.weight, "0.05");
-    const rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "×"; rm.setAttribute("aria-label", "Retirer");
-    rm.onclick = () => { l.enabled = false; renderLoras(); changed(); };
-    const rg = document.createElement("input"); rg.type = "range"; rg.min = "0"; rg.max = "1.5"; rg.step = "0.05"; rg.value = l.weight; paintRange(rg);
-    rg.oninput = () => { l.weight = parseFloat(rg.value); wv.textContent = fmt(l.weight, "0.05"); paintRange(rg); renderActLoras(true); changed(); };
-    r.append(nm, wv, rm, rg); list.appendChild(r);
+    const rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "×"; rm.title = "Retirer de la liste"; rm.setAttribute("aria-label", "Retirer de la liste");
+    rm.onclick = () => { const i = S.loras.indexOf(l); if (i >= 0) S.loras.splice(i, 1); renderLoras(); changed(); };
+    r.append(tg, nm, wv, rm);
+    if (l.enabled) {
+      const rg = document.createElement("input"); rg.type = "range"; rg.min = "0"; rg.max = "1.5"; rg.step = "0.05"; rg.value = l.weight; paintRange(rg);
+      rg.oninput = () => { l.weight = parseFloat(rg.value); wv.textContent = fmt(l.weight, "0.05"); paintRange(rg); renderActLoras(true); changed(); };
+      r.appendChild(rg);
+    }
+    list.appendChild(r);
   }
   const q = $("#cmLoraQ").value.trim().toLowerCase(), res = $("#cmLoraRes"); res.textContent = "";
-  const names = new Set(act.map(l => l.name));
-  const pool = [...(S.loras || []).filter(l => !l.enabled).map(l => ({ name: l.name, folder: "" })), ...loraCatalog]
+  const names = new Set(all.map(l => l.name));
+  const pool = loraCatalog
     .filter((l, i, a) => !names.has(l.name) && a.findIndex(x => x.name === l.name) === i && (!q || (l.name + " " + (l.folder || "")).toLowerCase().includes(q))).slice(0, 14);
   for (const l of pool) {
     const d = document.createElement("div"); d.textContent = l.name; d.setAttribute("data-noi18n", "");
