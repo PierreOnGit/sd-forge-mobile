@@ -764,7 +764,6 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
   body.cfgopen .controls{inset:0 0 0 auto;width:min(580px,100vw);border-left:1px solid var(--stroke);box-shadow:-24px 0 70px rgba(0,0,0,.5);animation:fade .2s}
   .controls .preview{display:none !important}
   .nowcard.show{display:grid;margin:0 32px 10px}
-  #cfgOpen{display:grid !important}
   header .pill{display:inline-flex !important}
   .banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:40;width:max-content;max-width:min(760px,calc(100vw - 48px));margin:0;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 }
@@ -980,7 +979,8 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
     <div class="seg mini" id="segSize2" style="margin-bottom:8px"><button data-sz="light" title="≈ 0,75 MP · plus rapide">Rapide</button><button data-sz="native" title="≈ 1 MP · résolution native SDXL">SDXL</button></div>
     <div class="chips" id="pRatios"></div>
     <div class="row dims" style="margin-top:10px"><div><label class="lbl" for="width2">Largeur</label><input id="width2" data-key="width" type="number" inputmode="numeric" step="8" min="256" max="4096"></div><button class="btn cbtn" id="swap2" aria-label="Inverser" title="Inverser">⇄</button><div><label class="lbl" for="height2">Hauteur</label><input id="height2" data-key="height" type="number" inputmode="numeric" step="8" min="256" max="4096"></div></div>
-    <div class="group-title">Steps · CFG</div>
+    <div class="group-title">Sampler · Steps · CFG</div>
+    <div class="cgrid" style="margin-bottom:8px"><div><label class="lbl" for="sampler2">Sampler</label><select id="sampler2" data-key="sampler"></select></div><div><label class="lbl" for="scheduler2">Scheduler</label><select id="scheduler2" data-key="scheduler"></select></div></div>
     <div class="cgrid"><div><label class="lbl">Steps <b data-show="steps"></b></label><input type="range" data-key="steps" min="1" max="60" step="1"></div><div><label class="lbl">CFG <b data-show="cfg"></b></label><input type="range" data-key="cfg" min="1" max="12" step="0.5"></div></div>
     <div class="group-title">Nombre d'images</div><div class="seg" id="pCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button><button data-v="8">8</button></div>
     <div class="group-title">Corrections</div>
@@ -2058,15 +2058,15 @@ function fillSelect(sel, items, current) {
 async function loadLists() {
   try {
     const [samplers, upscalers, latent] = await Promise.all([api("/sdapi/v1/samplers"), api("/sdapi/v1/upscalers"), api("/sdapi/v1/latent-upscale-modes").catch(() => [])]);
-    fillSelect($("#sampler"), samplers.map(s => ({ value: s.name, label: s.name })), S.sampler);
+    for (const id of ["#sampler", "#sampler2"]) fillSelect($(id), samplers.map(s => ({ value: s.name, label: s.name })), S.sampler);
     const ups = [...latent.map(u => u.name), ...upscalers.map(u => u.name)].filter((v, i, a) => v && a.indexOf(v) === i && v !== "None");
     fillSelect($("#upscaler"), ups.map(n => ({ value: n, label: n })), S.hires.upscaler);
   } catch (e) { if (e.status === 404) noApi(); }
   try {
     const sch = await api("/sdapi/v1/schedulers");
-    fillSelect($("#scheduler"), sch.map(s => ({ value: s.label || s.name, label: s.label || s.name })), S.scheduler);
+    for (const id of ["#scheduler", "#scheduler2"]) fillSelect($(id), sch.map(s => ({ value: s.label || s.name, label: s.label || s.name })), S.scheduler);
   } catch (e) {
-    fillSelect($("#scheduler"), ["Automatic", "Karras", "Exponential", "SGM Uniform", "Simple", "Normal", "Beta"].map(n => ({ value: n, label: n })), S.scheduler);
+    for (const id of ["#scheduler", "#scheduler2"]) fillSelect($(id), ["Automatic", "Karras", "Exponential", "SGM Uniform", "Simple", "Normal", "Beta"].map(n => ({ value: n, label: n })), S.scheduler);
   }
   await loadModels();
 }
@@ -3485,7 +3485,12 @@ function bindSettings() {
 function bind() {
   for (const el of $$("[data-key]")) {
     const ev = el.tagName === "SELECT" || el.type === "checkbox" ? "change" : "input";
-    el.addEventListener(ev, () => { setPath(S, el.dataset.key, readInput(el)); if (el.type === "range") paintRange(el); changed(); });
+    el.addEventListener(ev, () => {
+      setPath(S, el.dataset.key, readInput(el)); if (el.type === "range") paintRange(el);
+      // garde les doublons (composer ↔ Studio) synchronisés
+      for (const o of $$(`[data-key="${el.dataset.key}"]`)) if (o !== el) { if (o.type === "checkbox") o.checked = el.checked; else if (o.tagName === "SELECT") ensureOption(o, el.value); else o.value = el.value; if (o.type === "range") paintRange(o); }
+      changed();
+    });
   }
   bindSize();
   $("#swap").onclick = $("#swap2").onclick = () => { [S.width, S.height] = [S.height, S.width]; render(); changed(); };
