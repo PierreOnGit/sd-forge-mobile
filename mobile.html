@@ -321,6 +321,14 @@ a.btn{color:inherit;text-decoration:none;display:inline-block}
 #cmpLora .group-title,#cmpLora input[type=search]{flex:none}
 #cmLoraList{flex:0 1 auto;min-height:60px;max-height:48vh;overflow-y:auto;overflow-x:hidden;padding-right:4px;margin-bottom:8px}
 #cmpLora .cmres{flex:1 1 0;min-height:120px;max-height:none;overflow-y:auto}
+#cmpModel.show{display:flex !important;flex-direction:column;max-height:min(60vh,calc(100vh - var(--ch) - 40px));box-sizing:border-box}
+#cmpModel .cmres{flex:1 1 auto;max-height:none;min-height:0;overflow-y:auto}
+#cmModelQ{width:100%;box-sizing:border-box;flex:none}
+#cmModelRes div.on{background:var(--field);font-weight:650}#cmModelRes div.on::after{content:" ✓";color:var(--accent)}
+#cmpModelTxt{display:block;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+#cmpModelBtn .mico{width:17px;height:17px;flex:none;opacity:.8}
+@media (max-width:520px){body #composer #cmpModelBtn{padding:0;width:44px;justify-content:center}#cmpModelTxt{display:none}body #composer .cmppill{padding:0 12px}}
+@media (max-width:400px){body #composer .dockrow{gap:5px}body #composer .cmpplus{width:34px}body #composer #cmpModelBtn{width:40px}body #composer .cmppill{padding:0 10px;font-size:13px;height:40px}body #composer .dock .go{width:48px;height:48px}}
 #cmpLora input[type=search]{width:100%;margin-top:2px;box-sizing:border-box}
 @media (min-width:0px){
   .mtabs,.rail,#gJump,#cfgOpen{display:none !important}
@@ -981,6 +989,11 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
     <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="adetailer.body"><span></span></label><span>Corps entier</span></div>
     <div class="switchrow small"><label class="toggle"><input type="checkbox" data-key="hires.enabled"><span></span></label><span>Hires fix</span></div></div>
   </div>
+  <div class="cmppop glass" id="cmpModel">
+    <div class="group-title">Modèle</div>
+    <input type="search" id="cmModelQ" placeholder="Chercher un modèle…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="cmres" id="cmModelRes" data-noi18n></div>
+  </div>
   <div class="cmppop glass" id="cmpLora">
     <div class="group-title">LoRAs</div><div id="cmLoraList"></div>
     <input type="search" id="cmLoraQ" placeholder="Ajouter un LoRA…" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -988,6 +1001,7 @@ body.psheet #composer .hl textarea#prompt{min-height:150px}
   </div>
   <div class="dockrow">
     <button class="cmpplus" id="cmpPlus" aria-label="Studio" title="Studio : réglages, LoRAs, tags…">+</button>
+    <button class="cmppill" id="cmpModelBtn" aria-label="Modèle" title="Modèle"><svg class="mico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span id="cmpModelTxt" data-noi18n>…</span></button>
     <button class="cmppill" id="cmpPill" aria-label="Format et nombre d'images"><i class="rb" id="cmpRb"></i><span id="cmpPillTxt"></span></button>
     <button class="cmppill" id="cmpLoraBtn" aria-label="LoRAs" title="LoRAs"><span id="cmpLoraTxt">LoRA</span></button><span class="cmpsp"></span>
     <button class="grip" id="dockGrip" title="Glisser pour déplacer · double-clic pour replacer" aria-label="Déplacer">⠿</button>
@@ -1169,7 +1183,7 @@ const EN = {
   "parenthèses mal fermées": "unbalanced parentheses",
   // LoRAs
   "LoRAs": "LoRAs", "Rapide": "Fast", "Activer": "Enable", "à la suite": "in a row", "Aléatoire": "Random", "Inverser": "Swap", "≈ 0,75 MP · plus rapide": "≈ 0.75 MP · faster", "≈ 1 MP · résolution native SDXL": "≈ 1 MP · SDXL native resolution", "Tout afficher": "Show all", "Revenir aux onglets": "Back to tabs", "désactivé · réactiver": "disabled · re-enable", "Ajouter un LoRA…": "Add a LoRA…", "Aucun LoRA actif.": "No active LoRA.", "Désactivés · toucher pour réactiver": "Disabled · tap to re-enable",
-  "Réactiver": "Re-enable", "Désactiver": "Disable", "ex. toujours ajouter un fond détaillé, rester sobre sur les vêtements": "e.g. always add a detailed background, keep clothing simple", "Réglages de génération": "Generation settings", "Studio : réglages, LoRAs, tags…": "Studio: settings, LoRAs, tags…", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
+  "Réactiver": "Re-enable", "Chercher un modèle…": "Search a model…", "Aucun résultat": "No results", "Aucun modèle trouvé": "No model found", "Désactiver": "Disable", "ex. toujours ajouter un fond détaillé, rester sobre sur les vêtements": "e.g. always add a detailed background, keep clothing simple", "Réglages de génération": "Generation settings", "Studio : réglages, LoRAs, tags…": "Studio: settings, LoRAs, tags…", "Retirer de la liste": "Remove from list", "Retirer": "Remove", "Régler dans l'onglet LoRAs": "Adjust in the LoRAs tab",
   "Importer un LoRA (.safetensors)": "Import a LoRA (.safetensors)", "Chercher sur Civitai": "Search on Civitai", "Ajouter au prompt": "Add to prompt",
   "Déposer le LoRA ici": "Drop the LoRA here", ".safetensors · il sera copié dans models/Lora": ".safetensors · it will be copied to models/Lora",
   "Dépose un fichier .safetensors": "Drop a .safetensors file", "Activer": "Enable", "Activer + mots-clés": "Enable + trigger words",
@@ -2056,7 +2070,27 @@ async function loadLists() {
   }
   await loadModels();
 }
-let modelBusy = false;
+let modelBusy = false, modelList = [], modelCur = "";
+async function switchModel(title) {
+  if (!title) return;
+  modelBusy = true; toast("Changement de modèle…");
+  const t = $("#cmpModelTxt"), m = modelList.find(x => x.title === title); if (t && m) t.textContent = m.model_name;
+  try { await api("/mobile/api/model", { method: "POST", body: JSON.stringify({ title }) }); toast("Modèle sélectionné · chargé à la prochaine génération"); }
+  catch (e) { toast("Échec du changement de modèle", true); }
+  modelBusy = false; $("#model").blur(); loadModels();
+}
+function renderCmModel() {
+  const q = $("#cmModelQ").value.trim().toLowerCase(), res = $("#cmModelRes"); res.textContent = "";
+  $("#cmModelQ").hidden = modelList.length < 9;
+  const list = modelList.filter(m => !q || m.title.toLowerCase().includes(q));
+  if (!list.length) { const d = document.createElement("div"); d.className = "muted"; d.textContent = tr(modelList.length ? "Aucun résultat" : "Aucun modèle trouvé"); res.appendChild(d); return; }
+  for (const m of list) {
+    const d = document.createElement("div"); d.textContent = m.model_name; d.title = m.title;
+    if (m.title === modelCur) d.className = "on";
+    d.onclick = () => { $("#cmpModel").classList.remove("show"); if (m.title !== modelCur) { modelCur = m.title; switchModel(m.title); } };
+    res.appendChild(d);
+  }
+}
 async function loadModels() {
   if (modelBusy) return;
   try {
@@ -2069,6 +2103,9 @@ async function loadModels() {
     const m = models.find(x => x.title === cur || x.model_name === cur || (cur && x.title.startsWith(cur)));
     if (m && document.activeElement !== sel) sel.value = m.title;
     $("#modelHint").textContent = m ? m.model_name : (cur || "");
+    modelList = models; modelCur = m ? m.title : cur;
+    const t = $("#cmpModelTxt"); if (t) { t.textContent = m ? m.model_name : (cur.split(" [")[0] || "Modèle"); $("#cmpModelBtn").title = t.textContent; }
+    if ($("#cmpModel").classList.contains("show") && document.activeElement !== $("#cmModelQ")) renderCmModel();
   } catch (e) {}
 }
 async function loadLoras() {
@@ -3476,12 +3513,7 @@ function bind() {
   $("#reuseAll").onclick = () => reuse(true);
   $("#viewerClose").onclick = closeViewer;
   $("#viewer").onclick = e => { if (e.target.id === "viewer") closeViewer(); };
-  $("#model").onchange = async () => {
-    const title = $("#model").value; modelBusy = true; toast("Changement de modèle…");
-    try { await api("/mobile/api/model", { method: "POST", body: JSON.stringify({ title }) }); toast("Modèle sélectionné · chargé à la prochaine génération"); }
-    catch (e) { toast("Échec du changement de modèle", true); }
-    modelBusy = false; $("#model").blur(); loadModels();
-  };
+  $("#model").onchange = () => switchModel($("#model").value);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { pullState(); progressTick(); queueTick(); loadGallery("soft"); loadModels(); loadLoras(); } });
 }
 
@@ -3543,10 +3575,14 @@ async function init() {
       if (!mq.matches) return;
       if (!e.target.closest("#cmpPop, #cmpPill")) $("#cmpPop").classList.remove("show");
       if (!e.target.closest("#cmpLora, #cmpLoraBtn, #actLoras")) $("#cmpLora").classList.remove("show");
+      if (!e.target.closest("#cmpModel, #cmpModelBtn")) $("#cmpModel").classList.remove("show");
       if (document.body.classList.contains("psheet") && !e.target.closest("#composer, #ac, #toast, .toast")) close();
     }, true);
-    $("#cmpPill").onclick = () => { $("#cmpLora").classList.remove("show"); $("#cmpPop").classList.toggle("show"); };
-    $("#cmpLoraBtn").onclick = () => { $("#cmpPop").classList.remove("show"); $("#cmpLora").classList.toggle("show"); renderCmLora(); };
+    const pops = ["#cmpPop", "#cmpLora", "#cmpModel"], only = id => pops.forEach(p => { if (p !== id) $(p).classList.remove("show"); });
+    $("#cmpPill").onclick = () => { only("#cmpPop"); $("#cmpPop").classList.toggle("show"); };
+    $("#cmpLoraBtn").onclick = () => { only("#cmpLora"); $("#cmpLora").classList.toggle("show"); renderCmLora(); };
+    $("#cmpModelBtn").onclick = () => { only("#cmpModel"); $("#cmModelQ").value = ""; $("#cmpModel").classList.toggle("show"); renderCmModel(); if ($("#cmpModel").classList.contains("show")) loadModels(); };
+    $("#cmModelQ").addEventListener("input", renderCmModel);
     $("#cmLoraQ").addEventListener("input", renderCmLora);
     $$("#pCount button").forEach(b => b.onclick = () => { S.batch_count = +b.dataset.v; render(); changed(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("psheet")) close(); });
